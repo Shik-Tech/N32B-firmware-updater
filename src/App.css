@@ -1,0 +1,93 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+select,
+input {
+  border: 2px solid #ffffff;
+  padding: 5px;
+  font-size: 0.9em;
+  outline: none;
+  font-weight: bold;
+  border-radius: 5px;
+  text-align: center;
+  /* flex: 1; */
+  justify-content: flex-start;
+}
+
+input[type=checkbox] {
+  height: 18px;
+  width: 18px;
+  cursor: pointer;
+  flex: none;
+}
+
+input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  cursor: inherit;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  background-color: #1d1d1d;
+  outline: none;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
+  color: #ffffff;
+  padding: 8px;
+}
+
+button:hover {
+  color: #fdc06a;
+}
+
+button:active {
+  color: #bd6e00;
+}
+
+button:disabled {
+  color: gray;
+}
