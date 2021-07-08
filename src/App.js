@@ -19,10 +19,9 @@ function App() {
       console.log(ports);
     });
 
-    // To upload new sketch, tap twice on the reset button and click upload.
+    // To upload new sketch, tap twice on the reset button, wait 2 seconds and click upload.
     const avrgirl = new Avrgirl({
       board: 'leonardo',
-      // debug: true,
       manualReset: true
     });
 
