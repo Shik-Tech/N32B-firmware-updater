@@ -15,6 +15,7 @@
   "scripts": {
     "start": "rescripts start",
     "build": "rescripts build",
+    "dist": "npm run build && electron-builder",
     "test": "rescripts test",
     "eject": "rescripts eject",
     "app-dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\""
