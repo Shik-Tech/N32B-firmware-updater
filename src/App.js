@@ -8,12 +8,13 @@ function App() {
   const [fileName, updateFileName] = useState("");
   const [filePath, updateFilePath] = useState("");
   const [uploading, updateUploading] = useState(false);
-
+  const [errorMessage, updateErrorMessage] = useState(false);
 
 
   const handleSubmit = e => {
     updateUploading(true);
-    
+    updateErrorMessage(false);
+
     Avrgirl.list(function (err, ports) {
       console.log(ports);
     });
@@ -28,6 +29,7 @@ function App() {
     avrgirl.flash(filePath, function (error) {
       if (error) {
         console.error(error);
+        updateErrorMessage(true);
       } else {
         console.info('done.');
         Avrgirl.list(function (err, ports) {
@@ -39,37 +41,52 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <div>Load new firmware</div>
+    <div className="App column">
+      <h1>N32B Firmware updater</h1>
+      <div className="row">
+        <ol>
+          <li>Choose the new firmware file.</li>
+          <li>Double tap the reset button on the N32B device.</li>
+          <li>Wait 2 seconds.</li>
+          <li>Click the upload button</li>
+        </ol>
+      </div>
 
-      <button
-        type="button"
-        aria-controls="fileInput"
-        onClick={() => fileInput.current.click()}
-      >Choose file</button>
-      <input
-        type="file"
-        ref={fileInput}
-        onChange={() => {
-          if (fileInput.current.files.length > 0) {
-            console.log(fileInput.current.files[0]);
-            updateFileName(fileInput.current.files[0].name);
-            updateFilePath(fileInput.current.files[0].path);
-            Avrgirl.list(function (err, ports) {
-              console.log(ports);
-            });
+      <div className="row">
+        <button
+          type="button"
+          aria-controls="fileInput"
+          onClick={() => fileInput.current.click()}
+        >Choose firmware file</button>
+        <span id="fileName">
+          {fileName ? fileName : ''}
+        </span>
+        <input
+          type="file"
+          accept=".hex"
+          ref={fileInput}
+          onChange={() => {
+            if (fileInput.current.files.length > 0) {
+              console.log(fileInput.current.files[0]);
+              updateFileName(fileInput.current.files[0].name);
+              updateFilePath(fileInput.current.files[0].path);
+            }
           }
-        }
-        }
-      />
-      <span id="fileName">
-        {fileName ? fileName : "No file chosen"}
-      </span>
+          }
+        />
+      </div>
 
-      <button type="button" onClick={handleSubmit} disabled={!fileName}>Update</button>
+      <div className="row">
+        <button className="danger" type="button" onClick={handleSubmit} disabled={!fileName}>Update the device</button>
+      </div>
+
 
       {uploading &&
-        <div>Uploading</div>
+        <div>Uploading...</div>
+      }
+
+      {errorMessage &&
+        <div>Failed. Please make sure to double tap the reset button of the N32B device and wait 2 seconds before clicking update</div>
       }
     </div>
   );

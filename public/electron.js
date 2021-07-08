@@ -7,8 +7,8 @@ const isDev = process.mainModule.filename.indexOf('app.asar') === -1 ||
 
 function createWindow() {
     const appWindow = new BrowserWindow({
-        width: 1024,
-        height: 768,
+        width: 450,
+        height: 350,
         webPreferences: {
             nodeIntegration: true
         }
