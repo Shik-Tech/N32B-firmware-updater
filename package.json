@@ -13,11 +13,11 @@
     "react-scripts": "4.0.3"
   },
   "scripts": {
-    "start": "rescripts start",
-    "build": "rescripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "dist": "npm run build && electron-builder",
-    "test": "rescripts test",
-    "eject": "rescripts eject",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "rebuild-deps": "./node_modules/.bin/electron-rebuild",
     "dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\""
   },
@@ -37,8 +37,6 @@
     ]
   },
   "devDependencies": {
-    "@rescripts/cli": "0.0.16",
-    "@rescripts/rescript-env": "0.0.14",
     "concurrently": "^6.2.0",
     "electron": "^13.1.6",
     "electron-builder": "^22.5.1",
