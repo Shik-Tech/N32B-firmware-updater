@@ -4,13 +4,13 @@
   "private": true,
   "main": "public/electron.js",
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^12.0.0",
+    "@testing-library/user-event": "^13.1.9",
     "avrgirl-arduino": "^5.0.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3"
   },
   "scripts": {
     "start": "rescripts start",
@@ -18,7 +18,8 @@
     "dist": "npm run build && electron-builder",
     "test": "rescripts test",
     "eject": "rescripts eject",
-    "app-dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\""
+    "rebuild-deps": "./node_modules/.bin/electron-rebuild",
+    "dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -36,12 +37,12 @@
     ]
   },
   "devDependencies": {
-    "@rescripts/cli": "0.0.14",
-    "@rescripts/rescript-env": "0.0.12",
-    "concurrently": "^5.1.0",
-    "electron": "^8.2.3",
+    "@rescripts/cli": "0.0.16",
+    "@rescripts/rescript-env": "0.0.14",
+    "concurrently": "^6.2.0",
+    "electron": "^13.1.6",
     "electron-builder": "^22.5.1",
     "electron-rebuild": "^2.3.5",
-    "wait-on": "^4.0.2"
+    "wait-on": "^6.0.0"
   }
 }

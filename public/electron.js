@@ -6,11 +6,13 @@ const isDev = process.mainModule.filename.indexOf('app.asar') === -1 ||
     process.mainModule.filename.indexOf('app') === -1;
 
 function createWindow() {
-    const appWindow = new BrowserWindow({
+    let appWindow = new BrowserWindow({
         width: 450,
         height: 350,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            contextIsolation: false,
+            // worldSafeExecuteJavaScript: true
         }
     });
 
@@ -23,7 +25,7 @@ function createWindow() {
     }
     appWindow.on('closed', () => appWindow = null);
 }
-
+app.allowRendererProcessReuse = false;
 app.on('ready', createWindow);
 
 // Quit when all windows are closed.

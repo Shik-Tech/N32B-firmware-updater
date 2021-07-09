@@ -31,9 +31,6 @@ function App() {
         updateErrorMessage(true);
       } else {
         console.info('done.');
-        Avrgirl.list(function (err, ports) {
-          console.log(ports);
-        });
       }
       updateUploading(false);
     });
@@ -66,7 +63,6 @@ function App() {
           ref={fileInput}
           onChange={() => {
             if (fileInput.current.files.length > 0) {
-              console.log(fileInput.current.files[0]);
               updateFileName(fileInput.current.files[0].name);
               updateFilePath(fileInput.current.files[0].path);
             }
@@ -85,7 +81,7 @@ function App() {
       }
 
       {errorMessage &&
-        <div>Failed. Please make sure to double tap the reset button of the N32B device and wait 2 seconds before clicking update</div>
+        <div>Failed. Please make sure to double tap the reset button of the N32B device and wait 2 seconds before clicking the update button.</div>
       }
     </div>
   );
