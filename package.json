@@ -2,12 +2,24 @@
   "name": "n32b-firmware-updater",
   "version": "1.0.0",
   "private": true,
+  "homepage": "./",
   "main": "public/electron.js",
+  "build": {
+    "appId": "tech.shik.updater.firmware",
+    "productName": "N32B Firmware updater",
+    "copyright": "Copyright © 2021 SHIK",
+    "files": [
+      "build/**/*",
+      "assets/icon.*",
+      "node_modules/**/*"
+    ]
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.0.0",
     "@testing-library/user-event": "^13.1.9",
     "avrgirl-arduino": "^5.0.1",
+    "electron-is-dev": "^2.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3"

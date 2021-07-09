@@ -1,9 +1,6 @@
 const { app, BrowserWindow } = require('electron');
-
-// Check if we're running Electron while developing
-// It's never a good idea to run developer tools in public
-const isDev = process.mainModule.filename.indexOf('app.asar') === -1 ||
-    process.mainModule.filename.indexOf('app') === -1;
+const isDev = require('electron-is-dev');   
+const path = require('path');
 
 function createWindow() {
     let appWindow = new BrowserWindow({
@@ -11,38 +8,20 @@ function createWindow() {
         height: 350,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false,
-            // worldSafeExecuteJavaScript: true
+            contextIsolation: false
         }
     });
 
-    // If we are in dev mode, load the React app where it's run by default
-    // Otherwise load the compiled app from the build folder
-    appWindow.loadURL(isDev ? 'http://localhost:3000' : '../build/index.html');
+    const startURL = isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`;
+ 
+    appWindow.loadURL(startURL);
     if (isDev) {
-        // Open dev tools alongside our running app
         appWindow.webContents.openDevTools();
     }
-    appWindow.on('closed', () => appWindow = null);
+    appWindow.once('ready-to-show', () => appWindow.show());
+    appWindow.on('closed', () => {
+        appWindow = null;
+    });
 }
 app.allowRendererProcessReuse = false;
 app.on('ready', createWindow);
-
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-    // This is taken from their tutorial: https://www.electronjs.org/docs/tutorial/first-app
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-app.on('activate', () => {
-    // This is taken from their tutorial: https://www.electronjs.org/docs/tutorial/first-app
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    }
-});
