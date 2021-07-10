@@ -44,7 +44,7 @@ function App() {
           <li>Choose the new firmware file.</li>
           <li>Double tap the reset button on the N32B device.</li>
           <li>Wait 2 seconds.</li>
-          <li>Click the upload button</li>
+          <li>Click the update button</li>
         </ol>
       </div>
 
@@ -72,12 +72,12 @@ function App() {
       </div>
 
       <div className="row">
-        <button className="danger" type="button" onClick={handleSubmit} disabled={!fileName}>Update the device</button>
+        <button className="danger" type="button" onClick={handleSubmit} disabled={!fileName}>Update</button>
       </div>
 
 
       {uploading &&
-        <div>Uploading...</div>
+        <div>Updating firmware...</div>
       }
 
       {errorMessage &&
