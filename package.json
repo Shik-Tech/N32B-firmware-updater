@@ -1,6 +1,12 @@
 {
   "name": "n32b-firmware-updater",
+  "description": "N32B midi controller firmware updater",
   "version": "1.0.0",
+  "author": {
+    "name": "Shik",
+    "email": "info@shik.tech",
+    "url": "https://shik.tech"
+  },
   "private": true,
   "homepage": "./",
   "main": "public/electron.js",
@@ -12,7 +18,8 @@
       "build/**/*",
       "assets/icon.*",
       "node_modules/**/*"
-    ]
+    ],
+    "buildDependenciesFromSource": true
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
@@ -27,10 +34,10 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "dist": "yarn rebuild-deps && yarn build && electron-builder",
+    "dist": "yarn build && electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "rebuild-deps": "./node_modules/.bin/electron-rebuild",
+    "postinstall": "electron-builder install-app-deps",
     "dev": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "eslintConfig": {
@@ -52,7 +59,6 @@
     "concurrently": "^6.2.0",
     "electron": "^13.1.6",
     "electron-builder": "^22.5.1",
-    "electron-rebuild": "^2.3.5",
     "wait-on": "^6.0.0"
   }
 }
