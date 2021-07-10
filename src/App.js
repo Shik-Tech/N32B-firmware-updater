@@ -15,9 +15,9 @@ function App() {
     updateUploading(true);
     updateErrorMessage(false);
 
-    Avrgirl.list(function (err, ports) {
-      console.log(ports);
-    });
+    // Avrgirl.list(function (err, ports) {
+    //   console.log(ports);
+    // });
 
     // To upload new sketch, tap twice on the reset button, wait 2 seconds and click upload.
     const avrgirl = new Avrgirl({

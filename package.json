@@ -27,7 +27,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "dist": "npm run build && electron-builder",
+    "dist": "npm run rebuild-deps && npm run build && electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "rebuild-deps": "./node_modules/.bin/electron-rebuild",
