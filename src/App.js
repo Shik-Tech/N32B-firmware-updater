@@ -23,8 +23,15 @@ function App() {
 
     // To upload new sketch, tap twice on the reset button, wait 2 seconds and click upload.
     const avrgirl = new Avrgirl({
-      board: 'leonardo',
-      manualReset: true
+      manualReset: true,
+      board: {
+        name: 'leonardo',
+        baud: 57600,
+        signature: Buffer.from([0x43, 0x41, 0x54, 0x45, 0x52, 0x49, 0x4e]),
+        productId: ['0x0036', '0x0037', '0x8036', '0x800c'],
+        productPage: 'https://store.arduino.cc/leonardo',
+        protocol: 'avr109'
+      },
     });
 
     avrgirl.flash(filePath, function (error) {
