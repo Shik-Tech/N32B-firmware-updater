@@ -40,9 +40,6 @@ function App() {
       }
       updateUploading(false);
     });
-    Avrgirl.list(function (err, ports) {
-      console.log(ports);
-    });
   };
 
   return (
@@ -51,8 +48,6 @@ function App() {
       <div className="row">
         <ol>
           <li>Choose the new firmware file.</li>
-          <li>Double tap the reset button on the N32B device.</li>
-          <li>Wait 2 seconds.</li>
           <li>Click the update button</li>
         </ol>
       </div>
