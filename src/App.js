@@ -11,8 +11,7 @@ function App() {
   const [errorMessage, updateErrorMessage] = useState(false);
   const [doneUploading, updateDoneUploading] = useState(false);
 
-
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     updateUploading(true);
     updateErrorMessage(false);
     updateDoneUploading(false);
@@ -21,14 +20,12 @@ function App() {
     //   console.log(ports);
     // });
 
-    // To upload new sketch, tap twice on the reset button, wait 2 seconds and click upload.
     const avrgirl = new Avrgirl({
-      manualReset: true,
       board: {
         name: 'leonardo',
         baud: 57600,
         signature: Buffer.from([0x43, 0x41, 0x54, 0x45, 0x52, 0x49, 0x4e]),
-        productId: ['0x0036', '0x0037', '0x8036', '0x800c'],
+        productId: ['0x0036', '0x0037', '0x8036', '0x800c', '0x614f'],
         productPage: 'https://store.arduino.cc/leonardo',
         protocol: 'avr109'
       },
@@ -51,8 +48,6 @@ function App() {
       <div className="row">
         <ol>
           <li>Choose the new firmware file.</li>
-          <li>Double tap the reset button on the N32B device.</li>
-          <li>Wait 2 seconds.</li>
           <li>Click the update button</li>
         </ol>
       </div>
