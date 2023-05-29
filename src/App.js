@@ -1,16 +1,20 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
+import { map } from 'lodash';
+import { AppBar, Box, Button, Container, Divider, Drawer, FormControl, Grid, InputLabel, List, ListItem, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
+import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
+import firmwares from './firmwares';
 import './App.css';
+import logo from './shik-logo-small.png';
 
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
 
 function App() {
-  const fileInput = useRef(null);
-  const [fileName, updateFileName] = useState("");
-  const [filePath, updateFilePath] = useState("");
-  const [uploading, updateUploading] = useState(false);
-  const [errorMessage, updateErrorMessage] = useState(false);
-  const [doneUploading, updateDoneUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(firmwares[0].value);
+
+  const handleFirmwareSelect = (event) => {
+    setSelectedFile(event.target.value);
+  }
 
   // Find the port for Arduino Pro Micro to trigger reset
   async function findResetPort() {
@@ -60,7 +64,7 @@ function App() {
           port: uploadPort,
           manualReset: true
         });
-        // const filePath = `${__dirname}/hexs/${selectedFile}`
+        const filePath = `public/hexs/${selectedFile}`
         avrgirl.flash(filePath, (error) => {
           if (error) {
             console.error(error);
@@ -72,60 +76,78 @@ function App() {
     });
   }
 
-  const handleSubmit = async (e) => {
-    updateUploading(true);
-    updateErrorMessage(false);
-    updateDoneUploading(false);
-
-    await handleUpload().then((error) => {
-      if (error) {
-        console.error(error);
-        updateErrorMessage(true);
-      } else {
-        updateDoneUploading(true);
-      }
-      updateUploading(false);
-    });
-  };
-
   return (
-    <div className="App column">
-      <h1>N32B Firmware updater</h1>
-      <div className="row">
-        <ol>
-          <li>Choose the new firmware file.</li>
-          <li>Click the update button</li>
-        </ol>
-      </div>
+    <Container>
+      <AppBar position='absolute'>
+        <Toolbar variant="dense">
+          <Stack direction="row" spacing={1}>
+            <Stack
+              direction="row"
+              spacing={2}
+              divider={<Divider orientation="vertical" light />}
+              sx={{ flexGrow: 1 }}
+            >
+              <Box
+                component="img"
+                alt="SHIK logo"
+                src={logo}
+                sx={{
+                  height: 20,
+                  pt: 1
+                }}
+              />
+              <Typography sx={{ pt: 1 }} variant="body2" component="div">
+                N32B Firmware updater
+              </Typography>
+            </Stack>
+          </Stack>
+        </Toolbar>
+      </AppBar>
 
-      <div className="row">
-        <button
-          type="button"
-          aria-controls="fileInput"
-          onClick={() => fileInput.current.click()}
-        >Choose firmware file</button>
-        <span id="fileName">
-          {fileName ? fileName : ''}
-        </span>
-        <input
-          type="file"
-          accept=".hex"
-          ref={fileInput}
-          onChange={() => {
-            if (fileInput.current.files.length > 0) {
-              updateFileName(fileInput.current.files[0].name);
-              updateFilePath(fileInput.current.files[0].path);
-            }
-          }
-          }
-        />
-      </div>
+      <Grid
+        container
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ marginTop: 17 }}
+      >
+        <Stack
+          direction="column"
+        >
 
-      <div className="row">
-        <button className="danger" type="button" onClick={handleSubmit} disabled={!fileName}>Update</button>
-      </div>
+          <Stack
+            direction="row"
+            spacing={2}
+            divider={<Divider orientation="vertical" light />}
+            sx={{ flexGrow: 1 }}
+          >
+            <FormControl
+            >
+              <InputLabel id="firmware-select-label">Firmware</InputLabel>
+              <Select
+                labelId="firmware-select-label"
+                id="firmware-select"
+                value={selectedFile}
+                label="Firmware"
+                onChange={handleFirmwareSelect}
+              >
+                {map(firmwares, firmware => (
+                  <MenuItem key={firmware.version} value={firmware.value}>{firmware.name} - {firmware.version}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              onClick={handleUpload}
+              variant='contained'
+              endIcon={<UploadFileRoundedIcon />}
+            >
+              Upload
+            </Button>
+          </Stack>
+        </Stack>
 
-      {uploading &&
+      </Grid>
+      {/* {uploading &&
         <div>Updating firmware...</div>
       }
 
@@ -135,8 +157,8 @@ function App() {
 
       {doneUploading &&
         <div>Done. Restarting the device.</div>
-      }
-    </div>
+      } */}
+    </Container>
   );
 }
 
