@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import './App.css';
 
 const Avrgirl = window.require('avrgirl-arduino');
+const { SerialPort } = window.require('serialport');
 
 function App() {
   const fileInput = useRef(null);
@@ -11,27 +12,72 @@ function App() {
   const [errorMessage, updateErrorMessage] = useState(false);
   const [doneUploading, updateDoneUploading] = useState(false);
 
+  // Find the port for Arduino Pro Micro to trigger reset
+  async function findResetPort() {
+    let resetPort;
+    Avrgirl.list((err, ports) => {
+      resetPort = ports.find((port) => {
+        return port.vendorId === '1d50';
+      });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (!resetPort) {
+      throw new Error('Arduino Pro Micro reset port not found');
+    }
+    return resetPort.path;
+  }
+
+  // Find the port for Arduino to upload hex file
+  async function findUploadPort() {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    let uploadPort;
+    Avrgirl.list((err, ports) => {
+      uploadPort = ports.find((port) => {
+        return (port.vendorId === '1d50' && port.productId === '614f') ||
+          (port.vendorId === '2341' && port.productId === '0036') ||
+          port.vendorId === '2341';
+      });
+    });
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    if (uploadPort.length === 0) {
+      throw new Error('Arduino upload port not found');
+    }
+    return uploadPort.path;
+  }
+
+  const handleUpload = async () => {
+    const resetPort = await findResetPort();
+    console.log(resetPort);
+    // Trigger reset on Arduino Pro Micro
+    const arduinoResetPort = new SerialPort({ path: resetPort, baudRate: 1200 });
+    arduinoResetPort.on('open', () => {
+      arduinoResetPort.close(async () => {
+        const uploadPort = await findUploadPort();
+        const avrgirl = new Avrgirl({
+          board: 'micro',
+          port: uploadPort,
+          manualReset: true
+        });
+        // const filePath = `${__dirname}/hexs/${selectedFile}`
+        avrgirl.flash(filePath, (error) => {
+          if (error) {
+            console.error(error);
+          } else {
+            console.log('Upload complete');
+          }
+        });
+      });
+    });
+  }
+
   const handleSubmit = async (e) => {
     updateUploading(true);
     updateErrorMessage(false);
     updateDoneUploading(false);
 
-    // Avrgirl.list(function (err, ports) {
-    //   console.log(ports);
-    // });
-
-    const avrgirl = new Avrgirl({
-      board: {
-        name: 'leonardo',
-        baud: 57600,
-        signature: Buffer.from([0x43, 0x41, 0x54, 0x45, 0x52, 0x49, 0x4e]),
-        productId: ['0x0036', '0x0037', '0x8036', '0x800c', '0x614f'],
-        productPage: 'https://store.arduino.cc/leonardo',
-        protocol: 'avr109'
-      },
-    });
-
-    avrgirl.flash(filePath, function (error) {
+    await handleUpload().then((error) => {
       if (error) {
         console.error(error);
         updateErrorMessage(true);
@@ -79,17 +125,16 @@ function App() {
         <button className="danger" type="button" onClick={handleSubmit} disabled={!fileName}>Update</button>
       </div>
 
-
       {uploading &&
         <div>Updating firmware...</div>
       }
 
       {errorMessage &&
-        <div>Failed. Please make sure to double tap the reset button of the N32B device and wait 2 seconds before clicking the update button.</div>
+        <div>Failed.</div>
       }
 
       {doneUploading &&
-        <div>Done.</div>
+        <div>Done. Restarting the device.</div>
       }
     </div>
   );
