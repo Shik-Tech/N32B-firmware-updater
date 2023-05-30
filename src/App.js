@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { map } from 'lodash';
-import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Modal, Select, Stack, Toolbar, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import firmwares from './firmwares';
 import './App.css';
@@ -9,19 +9,57 @@ import logo from './shik-logo-small.png';
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
 
+const modalBoxStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 300,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 function App() {
   const [selectedFile, setSelectedFile] = useState(firmwares[0].value);
+  const [isUploading, setIsUploading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [succeedUploading, setSucceedUploading] = useState(false);
+  const [alertIndex, setAlertIndex] = useState(0);
+
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSucceedUploading(false);
+    setIsUploading(false);
+  };
 
   const handleFirmwareSelect = (event) => {
     setSelectedFile(event.target.value);
   }
+
+  const alertsMessages = [
+    {
+      title: 'Updating firmware',
+      description: 'Please wait...'
+    },
+    {
+      title: 'Done!',
+      description: 'Enjoy your new firmware.'
+    },
+    {
+      title: 'Something went wrong!',
+      description: 'Please re-connect the device and try again. Contact our support if the issue continues.'
+    }
+  ]
 
   // Find the port for Arduino Pro Micro to trigger reset
   async function findResetPort() {
     let resetPort;
     Avrgirl.list((err, ports) => {
       resetPort = ports.find((port) => {
-        return port.vendorId === '1d50';
+        return port.vendorId === '1d50' && port.productId === '614f';
       });
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -52,28 +90,41 @@ function App() {
   }
 
   const handleUpload = async () => {
-    const resetPort = await findResetPort();
-    console.log(resetPort);
-    // Trigger reset on Arduino Pro Micro
-    const arduinoResetPort = new SerialPort({ path: resetPort, baudRate: 1200 });
-    arduinoResetPort.on('open', () => {
-      arduinoResetPort.close(async () => {
-        const uploadPort = await findUploadPort();
-        const avrgirl = new Avrgirl({
-          board: 'micro',
-          port: uploadPort,
-          manualReset: true
-        });
-        const filePath = `public/hexs/${selectedFile}`
-        avrgirl.flash(filePath, (error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log('Upload complete');
-          }
+    setIsUploading(true);
+    setAlertIndex(0);
+    handleOpenModal();
+
+    try {
+      const resetPort = await findResetPort();
+      // Trigger reset on Arduino Pro Micro
+      const arduinoResetPort = new SerialPort({ path: resetPort, baudRate: 1200 });
+      arduinoResetPort.on('open', () => {
+        arduinoResetPort.close(async () => {
+          const uploadPort = await findUploadPort();
+          const avrgirl = new Avrgirl({
+            board: 'micro',
+            port: uploadPort,
+            manualReset: true
+          });
+          const filePath = `public/hexs/${selectedFile}`
+          avrgirl.flash(filePath, (error) => {
+            setIsUploading(false);
+
+            if (error) {
+              throw new Error(error);
+            } else {
+              setAlertIndex(1);
+              setSucceedUploading(true);
+              console.log('Upload complete');
+            }
+          });
         });
       });
-    });
+    } catch (error) {
+      setAlertIndex(2);
+      setSucceedUploading(false);
+      console.error(error);
+    }
   }
 
   return (
@@ -130,6 +181,7 @@ function App() {
                 value={selectedFile}
                 label="Firmware"
                 onChange={handleFirmwareSelect}
+                disabled={isUploading}
               >
                 {map(firmwares, firmware => (
                   <MenuItem key={firmware.version} value={firmware.value}>{firmware.name} - {firmware.version}</MenuItem>
@@ -140,24 +192,45 @@ function App() {
               onClick={handleUpload}
               variant='contained'
               endIcon={<UploadFileRoundedIcon />}
+              disabled={isUploading}
             >
               Upload
             </Button>
           </Stack>
         </Stack>
 
+
+        <Modal
+          open={openModal}
+          onClose={handleCloseModal}
+          aria-labelledby="firmware-alerts"
+          aria-describedby="firmware-alerts-description"
+          disableEscapeKeyDown
+          hideBackdrop
+        >
+          <Box sx={modalBoxStyle}>
+            <Stack
+              direction="column"
+              spacing={2}
+            >
+              <Typography id="firmware-alerts" variant="h6" component="h2">
+                {alertsMessages[alertIndex].title}
+              </Typography>
+              <Typography id="firmware-alerts-description" sx={{ mt: 2 }}>
+                {alertsMessages[alertIndex].description}
+              </Typography>
+
+              {!isUploading && succeedUploading &&
+                <Button
+                  onClick={handleCloseModal}
+                >
+                  Close
+                </Button>
+              }
+            </Stack>
+          </Box>
+        </Modal>
       </Grid>
-      {/* {uploading &&
-        <div>Updating firmware...</div>
-      }
-
-      {errorMessage &&
-        <div>Failed.</div>
-      }
-
-      {doneUploading &&
-        <div>Done. Restarting the device.</div>
-      } */}
     </Container>
   );
 }
