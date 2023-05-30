@@ -1,12 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
+import '@fontsource/roboto/300.css';
 import * as serviceWorker from './serviceWorker';
+import { ThemeProvider } from '@emotion/react';
+import { createTheme } from '@mui/material';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  }
+});
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={darkTheme}>
+      <App />
+    </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
