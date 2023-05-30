@@ -11,8 +11,8 @@ const firmwares = [
     },
     {
         name: 'SysEx Beta',
-        version: 'v30.0.1',
-        value: 'firmware_v30.0.1.hex'
+        version: 'v30.1.0',
+        value: 'firmware_v30.1.0.hex'
     },
 ];
 
