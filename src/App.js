@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { map } from 'lodash';
-import { AppBar, Box, Button, Container, Divider, Drawer, FormControl, Grid, InputLabel, List, ListItem, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import firmwares from './firmwares';
 import './App.css';
