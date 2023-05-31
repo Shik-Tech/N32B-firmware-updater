@@ -17,6 +17,7 @@
     "files": [
       "build/**/*",
       "assets/icon.*",
+      "public/hex/*",
       "node_modules/**/*"
     ],
     "buildDependenciesFromSource": true

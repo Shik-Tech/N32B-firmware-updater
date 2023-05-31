@@ -23,10 +23,6 @@ install:
   - npm install -g yarn
   - yarn
 
-before_build:
-  - cmd: xcopy /E /I public\hex dist\public\hex     # Windows
-  - sh: cp -R public/hex dist/public/hex             # macOS and Linux
-
 build_script:
   - yarn dist
   
