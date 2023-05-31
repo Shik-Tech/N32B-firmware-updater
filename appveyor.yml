@@ -11,9 +11,6 @@ platform:
 environment:
   nodejs_version: 16.17.1
 
-cache:
-  - node_modules
-
 init:
   - git config --global core.autocrlf input
 
