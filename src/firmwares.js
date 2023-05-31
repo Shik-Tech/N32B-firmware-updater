@@ -1,8 +1,8 @@
 const firmwares = [
     {
         name: 'Standard CC',
-        version: 'v4.0.0',
-        value: 'firmware_v4.0.0.hex'
+        version: 'v4.0.1',
+        value: 'firmware_v4.0.1.hex'
     },
     {
         name: 'Standard CC',
@@ -11,8 +11,8 @@ const firmwares = [
     },
     {
         name: 'SysEx Beta',
-        version: 'v30.1.0',
-        value: 'firmware_v30.1.0.hex'
+        version: 'v30.1.1',
+        value: 'firmware_v30.1.1.hex'
     },
 ];
 
