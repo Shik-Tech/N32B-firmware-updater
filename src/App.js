@@ -25,13 +25,11 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(firmwares[0].value);
   const [isUploading, setIsUploading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [succeedUploading, setSucceedUploading] = useState(false);
   const [alertIndex, setAlertIndex] = useState(0);
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => {
     setOpenModal(false);
-    setSucceedUploading(false);
     setIsUploading(false);
   };
 
@@ -106,23 +104,23 @@ function App() {
             port: uploadPort,
             manualReset: true
           });
-          const filePath = `public/hexs/${selectedFile}`
-          avrgirl.flash(filePath, (error) => {
+          const filePath = `public/hexs/${selectedFile}`;
+          await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);
 
             if (error) {
-              throw new Error(error);
+              setAlertIndex(2);
+              console.error(error);
             } else {
               setAlertIndex(1);
-              setSucceedUploading(true);
               console.log('Upload complete');
             }
           });
         });
       });
     } catch (error) {
+      setIsUploading(false);
       setAlertIndex(2);
-      setSucceedUploading(false);
       console.error(error);
     }
   }
@@ -220,7 +218,7 @@ function App() {
                 {alertsMessages[alertIndex].description}
               </Typography>
 
-              {!isUploading && succeedUploading &&
+              {!isUploading &&
                 <Button
                   onClick={handleCloseModal}
                 >
