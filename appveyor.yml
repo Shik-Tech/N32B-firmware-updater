@@ -1,8 +1,8 @@
 version: "2.0.{build}"
 
 image:
-  - Visual Studio 2017
   - macOS
+  - Visual Studio 2017
   - Ubuntu
 
 platform:
