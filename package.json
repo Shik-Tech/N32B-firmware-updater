@@ -18,11 +18,8 @@
       "build/**/*",
       "assets/icon.*",
       "node_modules/**/*",
-      {
-        "from": "public/hexs",
-        "to": "public/hexs",
-        "filter": ["**/*"]
-      }
+      "hexs/**/*",
+      "hexs"
     ],
     "buildDependenciesFromSource": true
   },
@@ -41,7 +38,8 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "serialport": "^11.0.0"
+    "serialport": "^11.0.0",
+    "electron": "^13.1.6"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -69,7 +67,6 @@
   },
   "devDependencies": {
     "concurrently": "^6.2.0",
-    "electron": "^13.1.6",
     "electron-builder": "^22.5.1",
     "wait-on": "^6.0.0"
   }
