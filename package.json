@@ -17,8 +17,12 @@
     "files": [
       "build/**/*",
       "assets/icon.*",
-      "public/hexs",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      {
+        "from": "public/hexs",
+        "to": "public/hexs",
+        "filter": ["**/*"]
+      }
     ],
     "buildDependenciesFromSource": true
   },
