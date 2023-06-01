@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { map } from 'lodash';
+import path from 'path';
 import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Modal, Select, Stack, Toolbar, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import firmwares from './firmwares';
@@ -8,6 +9,7 @@ import logo from './shik-logo-small.png';
 
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
+const { app } = window.require('electron');
 
 const modalBoxStyle = {
   position: 'absolute',
@@ -105,9 +107,9 @@ function App() {
             manualReset: true
           });
 
-          const filePath = process.env.NODE_ENV === 'production'
-          ? `${window.location.origin}${process.env.PUBLIC_URL}/hexs/${selectedFile}`
-          : `public/hexs/${selectedFile}`;
+          const isDevelopment = process.env.NODE_ENV === 'development';
+          const filePath = isDevelopment ? path.join('public', 'hexs', selectedFile) : path.join(app.getAppPath(), 'public', 'hexs', selectedFile);
+
           await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);
 
