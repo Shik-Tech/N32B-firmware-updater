@@ -9,7 +9,6 @@ import logo from './shik-logo-small.png';
 
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
-const { remote } = window.require('electron');
 
 const modalBoxStyle = {
   position: 'absolute',
@@ -106,9 +105,8 @@ function App() {
             port: uploadPort,
             manualReset: true
           });
-
-          const isDevelopment = process.env.NODE_ENV === 'development';
-          const filePath = isDevelopment ? path.join('hexs', selectedFile) : path.join(remote.app.getAppPath(), 'hexs', selectedFile);
+          const isProduction = process.env.NODE_ENV === "production";
+          const filePath = isProduction ? path.join(__dirname, 'hexs', selectedFile) : path.join('hexs', selectedFile);
 
           await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);
