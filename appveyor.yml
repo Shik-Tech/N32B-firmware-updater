@@ -1,8 +1,8 @@
-version: '2.0.{build}'
+version: "2.0.{build}"
 
 image:
   - Visual Studio 2017
-  - macos
+  - macOS
   - Ubuntu
 
 platform:
@@ -23,12 +23,16 @@ install:
   - npm install -g yarn
   - yarn
 
+# before_build:
+#   - cmd: xcopy /E /I public\hex dist\public\hex # Windows
+#   - sh: cp -R public/hex dist/public/hex # macOS and Linux
+
 build_script:
   - yarn dist
-  
-artifacts:
-  - path: dist/*.exe                                 # Windows
-  - path: dist/*.dmg                                 # macOS
-  - path: dist/*.AppImage                            # Linux
 
-test: off
+artifacts:
+  - path: dist/*.exe # Windows
+  - path: dist/*.dmg # macOS
+  - path: dist/*.AppImage # Linux
+
+test: false

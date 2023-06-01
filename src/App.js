@@ -104,7 +104,10 @@ function App() {
             port: uploadPort,
             manualReset: true
           });
-          const filePath = `public/hexs/${selectedFile}`;
+
+          const filePath = process.env.NODE_ENV === 'production'
+          ? `${process.env.PUBLIC_URL}/hexs/${selectedFile}`
+          : `public/hexs/${selectedFile}`;
           await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);
 

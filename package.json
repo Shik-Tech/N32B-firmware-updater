@@ -13,11 +13,11 @@
   "build": {
     "appId": "tech.shik.updater.firmware",
     "productName": "N32B Firmware updater",
-    "copyright": "Copyright © 2022 SHIK",
+    "copyright": "Copyright © 2023 SHIK",
     "files": [
       "build/**/*",
       "assets/icon.*",
-      "public/hex/*",
+      "public/hex/**",
       "node_modules/**/*"
     ],
     "buildDependenciesFromSource": true
