@@ -30,6 +30,9 @@
     ],
     "buildDependenciesFromSource": true
   },
+  "directories": {
+    "buildResources": "build"
+  },
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
