@@ -21,6 +21,33 @@ function createWindow() {
             : `file://${path.join(__dirname, '../build/index.html')}`
     );
 
+    appWindow.webContents.session.on('select-serial-port', (event, portList, webContents, callback) => {
+        // console.log('SELECT-SERIAL-PORT FIRED WITH', portList);
+        event.preventDefault();
+
+        let selectedPort = portList.find((device) => {
+            return true;
+        });
+        if (!selectedPort) {
+            callback('')
+        } else {
+            callback(selectedPort.portId)
+        }
+    });
+    appWindow.webContents.session.on('serial-port-added', (event, port) => {
+        // console.log('serial-port-added FIRED WITH', port);
+        event.preventDefault();
+    });
+
+    appWindow.webContents.session.on('serial-port-removed', (event, port) => {
+        // console.log('serial-port-removed FIRED WITH', port);
+        event.preventDefault();
+    });
+
+    appWindow.webContents.session.on('select-serial-port-cancelled', () => {
+        // console.log('select-serial-port-cancelled FIRED.');
+    });
+
     if (isDev) {
         appWindow.webContents.openDevTools({ mode: 'detach' });
     }
