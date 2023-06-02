@@ -119,7 +119,6 @@ function App() {
             port: uploadPort,
             manualReset: true
           });
-          // const isProduction = process.env.NODE_ENV === "production";
           const filePath = `${resourcesPath}/hexs/${selectedFile}`;
 
           await avrgirl.flash(filePath, (error) => {
