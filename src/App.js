@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { map } from 'lodash';
-import path from 'path';
 import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Modal, Select, Stack, Toolbar, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import firmwares from './firmwares';
@@ -9,6 +8,7 @@ import logo from './shik-logo-small.png';
 
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
+const { ipcRenderer } = window.require('electron');
 
 const modalBoxStyle = {
   position: 'absolute',
@@ -27,6 +27,7 @@ function App() {
   const [isUploading, setIsUploading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [alertIndex, setAlertIndex] = useState(0);
+  const [resourcesPath, setResourcesPath] = useState('');
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => {
@@ -37,6 +38,19 @@ function App() {
   const handleFirmwareSelect = (event) => {
     setSelectedFile(event.target.value);
   }
+
+
+  useEffect(() => {
+    // Listen to the 'resources-path' event from the main process
+    ipcRenderer.on('resources-path', (event, path) => {
+      setResourcesPath(path);
+    });
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      ipcRenderer.removeAllListeners('resources-path');
+    };
+  }, []);
 
   const alertsMessages = [
     {
@@ -105,8 +119,8 @@ function App() {
             port: uploadPort,
             manualReset: true
           });
-          const isProduction = process.env.NODE_ENV === "production";
-          const filePath = isProduction ? path.join(process.env.PUBLIC_URL, 'hexs', selectedFile) : path.join('hexs', selectedFile);
+          // const isProduction = process.env.NODE_ENV === "production";
+          const filePath = `${resourcesPath}/hexs/${selectedFile}`;
 
           await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);

@@ -24,6 +24,15 @@ function createWindow() {
     if (isDev) {
         appWindow.webContents.openDevTools({ mode: 'detach' });
     }
+
+    appWindow.webContents.on('did-finish-load', () => {
+        appWindow.webContents.send('resources-path', getResourcesPath());
+    });
+}
+function getResourcesPath() {
+    return isDev
+        ? app.getAppPath() // Development mode
+        : path.join(app.getAppPath(), '..'); // Production mode
 }
 
 app.whenReady().then(() => {
