@@ -106,7 +106,7 @@ function App() {
             manualReset: true
           });
           const isProduction = process.env.NODE_ENV === "production";
-          const filePath = isProduction ? path.join(__dirname, 'hexs', selectedFile) : path.join('hexs', selectedFile);
+          const filePath = isProduction ? path.join('hexs', selectedFile) : path.join('hexs', selectedFile);
 
           await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);
