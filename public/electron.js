@@ -11,7 +11,8 @@ function createWindow() {
         height: 350,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            enableBlinkFeatures: 'Serial'
         }
     });
 
