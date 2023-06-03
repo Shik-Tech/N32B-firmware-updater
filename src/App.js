@@ -73,13 +73,12 @@ function App() {
 
     Avrgirl.list((err, ports) => {
       console.log(ports);
-      resetPort = ports.find((port) => port.vendorId === '1d50');
+      resetPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     if (!resetPort) {
       throw new Error('Arduino Pro Micro reset port not found');
     }
-    console.log(resetPort, resetPort.path);
     return resetPort.path;
   }
 
@@ -90,7 +89,7 @@ function App() {
     let uploadPort;
     Avrgirl.list((err, ports) => {
       console.log(ports);
-      uploadPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '2341');
+      uploadPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50' || port.vendorId === '2341');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -98,7 +97,6 @@ function App() {
       throw new Error('Arduino upload port not found');
     }
 
-    console.log(uploadPort, uploadPort.path);
     return uploadPort.path;
   }
 
