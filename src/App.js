@@ -72,7 +72,6 @@ function App() {
     let resetPort;
 
     Avrgirl.list((err, ports) => {
-      console.log(ports);
       resetPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -88,7 +87,6 @@ function App() {
 
     let uploadPort;
     Avrgirl.list((err, ports) => {
-      console.log(ports);
       uploadPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50' || port.vendorId === '2341');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
