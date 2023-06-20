@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { map } from 'lodash';
+import { map, find } from 'lodash';
 import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Modal, Select, Stack, Toolbar, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import firmwares from './firmwares';
@@ -38,7 +38,6 @@ function App() {
   const handleFirmwareSelect = (event) => {
     setSelectedFile(event.target.value);
   }
-
 
   useEffect(() => {
     // Listen to the 'resources-path' event from the main process
@@ -174,6 +173,7 @@ function App() {
       >
         <Stack
           direction="column"
+          spacing={2}
         >
 
           <Stack
@@ -198,6 +198,9 @@ function App() {
                 ))}
               </Select>
             </FormControl>
+
+            <Divider orientation="vertical" variant="middle" flexItem />
+
             <Button
               onClick={handleUpload}
               variant='contained'
@@ -207,6 +210,9 @@ function App() {
               Upload
             </Button>
           </Stack>
+          <Typography>
+            Description: {find(firmwares, (firmware) => firmware.value === selectedFile).description}
+          </Typography>
         </Stack>
 
 
