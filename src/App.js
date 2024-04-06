@@ -1,33 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { map, find } from 'lodash';
-import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Modal, Select, Stack, Toolbar, Typography } from '@mui/material';
+import { map, find, get } from 'lodash';
+import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
+import { WebMidi } from "webmidi";
 import firmwares from './firmwares';
 import './App.css';
 import logo from './shik-logo-small.png';
+import { SEND_FIRMWARE_VERSION } from './commands';
+import DialogBox from './components/DialogBox/DialogBox';
 
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
 const { ipcRenderer } = window.require('electron');
 
-const modalBoxStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 300,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
 function App() {
-  const [selectedFile, setSelectedFile] = useState(firmwares[0].value);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [alertIndex, setAlertIndex] = useState(0);
   const [resourcesPath, setResourcesPath] = useState('');
+  const [midiInput, setMidiInput] = useState(null);
+  const [midiOutput, setMidiOutput] = useState(null);
+  const [deviceConnected, setDeviceConnected] = useState(false);
+  const [firmwareVersion, setFirmwareVersion] = useState(null);
+  const [deviceFirmwareOptions, setDeviceFirmwareOptions] = useState([]);
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => {
@@ -51,27 +47,70 @@ function App() {
     };
   }, []);
 
-  const alertsMessages = [
-    {
-      title: 'Updating firmware',
-      description: 'Please wait...'
-    },
-    {
-      title: 'Done!',
-      description: 'Enjoy your new firmware.'
-    },
-    {
-      title: 'Something went wrong!',
-      description: 'Please re-connect the device and try again. Contact our support if the issue continues.'
+  useEffect(() => {
+    if (midiInput && midiOutput) {
+      midiInput.addListener('sysex', handleFirmwareSysEx);
+      midiOutput.sendSysex(32, [SEND_FIRMWARE_VERSION]);
+      const firmwareIndex = midiOutput.name === 'SHIK N32B' ? 0 : 1;
+      setDeviceFirmwareOptions(firmwares[firmwareIndex].firwmareOptions);
+      setSelectedFile(firmwares[firmwareIndex].firwmareOptions[0].value);
     }
-  ]
+    return () => {
+      if (midiInput) {
+        midiInput.removeListener('sysex', handleFirmwareSysEx);
+
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [midiInput, midiOutput]);
+
+  function handleFirmwareSysEx(e) {
+    const {
+      dataBytes,
+      message: {
+        manufacturerId
+      }
+    } = e;
+
+    if (manufacturerId[0] === 32) {
+      if (dataBytes[0] === SEND_FIRMWARE_VERSION && dataBytes.length > 2) {
+        const firmwareVersion = dataBytes.slice(1);
+        setFirmwareVersion(firmwareVersion);
+      }
+    }
+  }
+
+  WebMidi.addListener("connected", (event) => {
+    const inputDevice = WebMidi.getInputByName("N32B");
+    const outputDevice = WebMidi.getOutputByName("N32B");
+    if (inputDevice && outputDevice && !midiInput && !midiOutput) {
+      setMidiInput(inputDevice);
+      setMidiOutput(outputDevice);
+      setDeviceConnected(true);
+    }
+  });
+
+  WebMidi.addListener("disconnected", (event) => {
+    const result = find(event.port, el => get(el, 'name') === 'SHIK N32B' | get(el, 'name') === 'SHIK N32B V3');
+    if (result) {
+      setDeviceConnected(false);
+      setFirmwareVersion(null);
+      setMidiInput(null);
+      setMidiOutput(null);
+    }
+  });
+
+  WebMidi.enable({ sysex: true });
+
+  const vendorIds = ['2341', '1b4f', '1d50', '1D50'];
 
   // Find the port for Arduino Pro Micro to trigger reset
   async function findResetPort() {
     let resetPort;
 
     Avrgirl.list((err, ports) => {
-      resetPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50');
+      resetPort = ports.find((port) => vendorIds.find(vendorId => vendorId === port.vendorId));
+      // resetPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     if (!resetPort) {
@@ -86,7 +125,8 @@ function App() {
 
     let uploadPort;
     Avrgirl.list((err, ports) => {
-      uploadPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50' || port.vendorId === '2341');
+      uploadPort = ports.find((port) => vendorIds.find(vendorId => vendorId === port.vendorId));
+      // uploadPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50' || port.vendorId === '2341');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -114,7 +154,8 @@ function App() {
             port: uploadPort,
             manualReset: true
           });
-          const filePath = `${resourcesPath}/hexs/${selectedFile}`;
+          const rootFolder = midiOutput.name === 'SHIK N32B V3' ? 'v3' : 'v2';
+          const filePath = `${resourcesPath}/hexs/${rootFolder}/${selectedFile}`;
 
           await avrgirl.flash(filePath, (error) => {
             setIsUploading(false);
@@ -144,7 +185,7 @@ function App() {
             <Stack
               direction="row"
               spacing={2}
-              divider={<Divider orientation="vertical" light />}
+              divider={<Divider orientation="vertical" />}
               sx={{ flexGrow: 1 }}
             >
               <Box
@@ -169,83 +210,63 @@ function App() {
         direction="column"
         alignItems="center"
         justifyContent="center"
-        sx={{ marginTop: 17 }}
+        sx={{ marginTop: 10 }}
       >
-        <Stack
-          direction="column"
-          spacing={2}
-        >
-
+        {(deviceConnected || isUploading) && firmwareVersion && deviceFirmwareOptions &&
           <Stack
-            direction="row"
+            direction="column"
             spacing={2}
-            divider={<Divider orientation="vertical" light />}
-            sx={{ flexGrow: 1 }}
           >
-            <FormControl
+            <Typography>Detected {midiOutput.name}</Typography>
+            <Typography>Your current firmware is: v{firmwareVersion.join('.')}</Typography>
+            <Stack
+              direction="row"
+              spacing={2}
+              divider={<Divider orientation="vertical" />}
+              sx={{ flexGrow: 1 }}
             >
-              <InputLabel id="firmware-select-label">Firmware</InputLabel>
-              <Select
-                labelId="firmware-select-label"
-                id="firmware-select"
-                value={selectedFile}
-                label="Firmware"
-                onChange={handleFirmwareSelect}
+              <FormControl
+              >
+                <InputLabel id="firmware-select-label">Firmware</InputLabel>
+                <Select
+                  labelId="firmware-select-label"
+                  id="firmware-select"
+                  value={selectedFile}
+                  label="Firmware"
+                  onChange={handleFirmwareSelect}
+                  disabled={isUploading}
+                >
+                  {map(deviceFirmwareOptions, firmware => (
+                    <MenuItem key={firmware.version} value={firmware.value}>{firmware.name} - v{firmware.version}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Divider orientation="vertical" variant="middle" flexItem />
+
+              <Button
+                onClick={handleUpload}
+                variant='contained'
+                endIcon={<UploadFileRoundedIcon />}
                 disabled={isUploading}
               >
-                {map(firmwares, firmware => (
-                  <MenuItem key={firmware.version} value={firmware.value}>{firmware.name} - {firmware.version}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Divider orientation="vertical" variant="middle" flexItem />
-
-            <Button
-              onClick={handleUpload}
-              variant='contained'
-              endIcon={<UploadFileRoundedIcon />}
-              disabled={isUploading}
-            >
-              Upload
-            </Button>
-          </Stack>
-          <Typography>
-            Description: {find(firmwares, (firmware) => firmware.value === selectedFile).description}
-          </Typography>
-        </Stack>
-
-
-        <Modal
-          open={openModal}
-          onClose={handleCloseModal}
-          aria-labelledby="firmware-alerts"
-          aria-describedby="firmware-alerts-description"
-          disableEscapeKeyDown
-          hideBackdrop
-        >
-          <Box sx={modalBoxStyle}>
-            <Stack
-              direction="column"
-              spacing={2}
-            >
-              <Typography id="firmware-alerts" variant="h6" component="h2">
-                {alertsMessages[alertIndex].title}
-              </Typography>
-              <Typography id="firmware-alerts-description" sx={{ mt: 2 }}>
-                {alertsMessages[alertIndex].description}
-              </Typography>
-
-              {!isUploading &&
-                <Button
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </Button>
-              }
+                Upload
+              </Button>
             </Stack>
-          </Box>
-        </Modal>
+          </Stack>
+        }
+
+        {!deviceConnected && !isUploading &&
+          <Typography>Please connect your N32B midi controller</Typography>
+        }
+
+        <DialogBox
+          openModal={openModal}
+          handleCloseModal={handleCloseModal}
+          alertIndex={alertIndex}
+          isUploading={isUploading}
+        />
+
       </Grid>
     </Container>
   );
