@@ -1,17 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { map, find, get } from 'lodash';
-import { AppBar, Box, Button, Container, Divider, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
-import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
+import { Alert, AppBar, Box, Button, CssBaseline, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
+import {
+  UploadFileRounded as UploadFileRoundedIcon,
+  RotateRight as RotateRightIcon
+} from '@mui/icons-material/';
 import { WebMidi } from "webmidi";
 import firmwares from './firmwares';
-import './App.css';
-import logo from './shik-logo-small.png';
+import logo from './shik-logo-white.png';
 import { SEND_FIRMWARE_VERSION } from './commands';
 import DialogBox from './components/DialogBox/DialogBox';
+import styled from '@emotion/styled';
 
 const Avrgirl = window.require('avrgirl-arduino');
 const { SerialPort } = window.require('serialport');
 const { ipcRenderer } = window.require('electron');
+
+const RotatingIcon = styled(RotateRightIcon)({
+  '@keyframes rotateAnimation': {
+    from: { transform: 'rotate(0deg)' },
+    to: { transform: 'rotate(360deg)' },
+  },
+  animation: 'rotateAnimation 2s linear infinite',
+});
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -178,55 +189,51 @@ function App() {
   }
 
   return (
-    <Container>
-      <AppBar position='absolute'>
-        <Toolbar variant="dense">
-          <Stack direction="row" spacing={1}>
-            <Stack
-              direction="row"
-              spacing={2}
-              divider={<Divider orientation="vertical" />}
-              sx={{ flexGrow: 1 }}
-            >
-              <Box
-                component="img"
-                alt="SHIK logo"
-                src={logo}
-                sx={{
-                  height: 20,
-                  pt: 1
-                }}
-              />
-              <Typography sx={{ pt: 1 }} variant="body2" component="div">
-                N32B Firmware updater
-              </Typography>
-            </Stack>
-          </Stack>
+    <Box>
+      <CssBaseline />
+      <AppBar component="nav">
+        <Toolbar>
+          <Box
+            component="img"
+            alt="SHIK logo"
+            src={logo}
+            sx={{
+              height: 20,
+              pt: 1,
+              mr: 2,
+            }}
+          />
+          <Typography sx={{ pt: 1, flexGrow: 1 }} variant="body2" component="div">
+            N32B Firmware updater
+          </Typography>
         </Toolbar>
       </AppBar>
 
-      <Grid
-        container
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ marginTop: 10 }}
-      >
+      <Box component="main" sx={{ p: 3 }}>
+        <Toolbar />
         {(deviceConnected || isUploading) && firmwareVersion && deviceFirmwareOptions &&
           <Stack
             direction="column"
             spacing={2}
           >
-            <Typography>Detected {midiOutput.name}</Typography>
-            <Typography>Your current firmware is: v{firmwareVersion.join('.')}</Typography>
+            <Alert severity="success">Connected to {midiOutput.name}</Alert>
+
+            <Typography
+              sx={{
+                p: 1
+              }}
+            >Your current firmware version is: v{firmwareVersion.join('.')}</Typography>
+            <Divider />
+
             <Stack
               direction="row"
+              justifyContent="center"
               spacing={2}
-              divider={<Divider orientation="vertical" />}
-              sx={{ flexGrow: 1 }}
+              sx={{
+                pt: 2
+              }}
             >
-              <FormControl
-              >
+              <FormControl>
                 <InputLabel id="firmware-select-label">Firmware</InputLabel>
                 <Select
                   labelId="firmware-select-label"
@@ -242,13 +249,12 @@ function App() {
                 </Select>
               </FormControl>
 
-              <Divider orientation="vertical" variant="middle" flexItem />
-
               <Button
                 onClick={handleUpload}
                 variant='contained'
-                endIcon={<UploadFileRoundedIcon />}
+                startIcon={<UploadFileRoundedIcon />}
                 disabled={isUploading}
+                color='error'
               >
                 Upload
               </Button>
@@ -256,8 +262,20 @@ function App() {
           </Stack>
         }
 
+        {deviceConnected && !firmwareVersion &&
+          <Alert severity='info' icon={<RotatingIcon />}>
+            <Typography>
+              Connecting to {midiOutput.name}...
+            </Typography>
+
+          </Alert>
+        }
+
         {!deviceConnected && !isUploading &&
-          <Typography>Please connect your N32B midi controller</Typography>
+          <Alert severity="error">
+            No device detected.
+            <Typography>Please connect your N32B MIDI controller.</Typography>
+          </Alert>
         }
 
         <DialogBox
@@ -266,9 +284,8 @@ function App() {
           alertIndex={alertIndex}
           isUploading={isUploading}
         />
-
-      </Grid>
-    </Container>
+      </Box>
+    </Box>
   );
 }
 

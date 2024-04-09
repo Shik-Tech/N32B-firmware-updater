@@ -9,6 +9,21 @@ import { createTheme } from '@mui/material';
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
+    background: {
+      default: '#232323'
+    }
+  },
+  components: {
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          background: '#000',
+          color: '#fff',
+          padding: '0 6px',
+          borderRadius: '4px'
+        }
+      }
+    }
   }
 });
 
