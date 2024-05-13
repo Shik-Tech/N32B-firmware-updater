@@ -39,8 +39,8 @@ const firmwares = [
         firwmareOptions: [
             {
                 name: 'Advanced Macros',
-                version: '4.5.0',
-                value: 'firmware_v4.5.0.hex',
+                version: '4.5.2',
+                value: 'firmware_v4.5.2.hex',
                 description: 'Advanced macros'
             }
         ]
