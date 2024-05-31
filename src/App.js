@@ -120,7 +120,10 @@ function App() {
     let resetPort;
 
     Avrgirl.list((err, ports) => {
-      resetPort = ports.find((port) => vendorIds.find(vendorId => vendorId === port.vendorId));
+      resetPort = ports.find((port) => {
+        console.log("Reset ports", port);
+        return vendorIds.find(vendorId => vendorId === port.vendorId);
+      });
       // resetPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
