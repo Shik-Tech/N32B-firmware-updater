@@ -121,10 +121,9 @@ function App() {
 
     Avrgirl.list((err, ports) => {
       resetPort = ports.find((port) => {
-        console.log("Reset ports", port);
+        // console.log("Reset ports", port);
         return vendorIds.find(vendorId => vendorId === port.vendorId);
       });
-      // resetPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     if (!resetPort) {
@@ -140,10 +139,9 @@ function App() {
     let uploadPort;
     Avrgirl.list((err, ports) => {
       uploadPort = ports.find((port) => {
-        console.log("Upload ports", port);
+        // console.log("Upload ports", port);
         return vendorIds.find(vendorId => vendorId === port.vendorId);
       });
-      // uploadPort = ports.find((port) => port.vendorId === '1d50' || port.vendorId === '1D50' || port.vendorId === '2341');
     });
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
