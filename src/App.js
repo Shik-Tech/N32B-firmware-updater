@@ -113,7 +113,7 @@ function App() {
 
   WebMidi.enable({ sysex: true });
 
-  const vendorIds = ['2341', '1b4f', '1d50', '1D50'];
+  const vendorIds = ['2341', '1b4f', '1B4F', '1d50', '1D50'];
 
   // Find the port for Arduino Pro Micro to trigger reset
   async function findResetPort() {
