@@ -3,6 +3,12 @@ const firmwares = [
         name: 'N32B V2',
         firwmareOptions: [
             {
+                name: 'Advanced Macros+',
+                version: '4.5.4',
+                value: 'firmware_v4.5.4.hex',
+                description: 'Bug fixes'
+            },
+            {
                 name: 'Advanced Macros',
                 version: '4.5.2',
                 value: 'firmware_v4.5.2.hex',
@@ -37,6 +43,12 @@ const firmwares = [
     {
         name: 'N32B V3',
         firwmareOptions: [
+            {
+                name: 'Advanced Macros+',
+                version: '4.5.4',
+                value: 'firmware_v4.5.4.hex',
+                description: 'Bug fixes'
+            },
             {
                 name: 'Advanced Macros',
                 version: '4.5.2',
