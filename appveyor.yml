@@ -21,10 +21,10 @@ install:
   - ps: |
       if ($env:APPVEYOR_BUILD_WORKER_IMAGE -match "Visual Studio") {
           choco install nvm
-          # Manually refresh the environment variables to ensure nvm is recognized
-          $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine)
-          nvm install $env:nodejs_version
-          nvm use $env:nodejs_version
+          # Use the direct path to nvm since the PATH might not be refreshed immediately
+          $nvmPath = "C:\ProgramData\chocolatey\lib\nvm.install\tools\nvm.exe"
+          & $nvmPath install $env:nodejs_version
+          & $nvmPath use $env:nodejs_version
       }
   - sh: |
       if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]; then
