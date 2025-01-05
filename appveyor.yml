@@ -11,21 +11,21 @@ environment:
   nodejs_version: "22"
 install:
   - cmd: powershell Install-Product node $env:nodejs_version x64
-  - ps: |
-      if ($env:OS -eq "Windows_NT") {
-        Install-Product node $env:nodejs_version
-        choco install python2 -y
-        choco install visualstudio2022buildtools -y
-        npm install -g yarn
-        yarn install
-      }
+  # - ps: |
+  #     if ($env:OS -eq "Windows_NT") {
+  #       Install-Product node $env:nodejs_version
+  #       choco install python2 -y
+  #       choco install visualstudio2022buildtools -y
+  #       npm install -g yarn
+  #       yarn install
+  #     }
   - sh: |
       if [ "$env:OS" != "Windows_NT" ]; then
         . $HOME/.nvm/nvm.sh
         nvm install $env:nodejs_version
-        npm install -g yarn
-        yarn install
       fi
+  - npm install -g yarn
+  - yarn install
 build_script:
   - yarn dist
 artifacts:
