@@ -20,7 +20,7 @@ install:
         Install-Product node $env:nodejs_version
         npm install -g yarn
         npm install -g node-gyp
-        npm config set msvs_version 2022
+        $env:GYP_MSVS_VERSION = "2022"
       }
 
   # macOS setup
