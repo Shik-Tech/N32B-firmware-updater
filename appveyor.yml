@@ -1,5 +1,6 @@
-version: "3.0.{build}"
+version: "{build}"
 
+# Define build images for each platform
 image:
   - Visual Studio 2022
   - macos-monterey
@@ -11,47 +12,53 @@ platform:
 environment:
   nodejs_version: "22"
 
-cache:
-  - node_modules
-
-init:
-  - git config --global core.autocrlf input
-
 install:
-  # Windows: Using the recommended Appveyor method with Install-Product
+  # Windows setup
   - ps: |
-      Write-Host "Installing Node.js $env:nodejs_version for Windows"
-      Install-Product node $env:nodejs_version
-      npm install -g yarn
+      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2022") {
+        Write-Host "Installing Node.js $env:nodejs_version for Windows"
+        Install-Product node $env:nodejs_version
+        npm install -g yarn
+        npm install -g node-gyp
+        npm config set msvs_version 2022
+      }
 
-  # macOS and Ubuntu: Use package managers directly
+  # macOS setup
+  - sh: |
+      if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "macos-monterey" ]]; then
+        brew install node@22
+        npm install -g yarn
+        npm install -g node-gyp
+      fi
+
+  # Ubuntu setup
   - sh: |
       if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]]; then
         sudo apt-get update
-        sudo apt-get install -y nodejs npm yarn
-      elif [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "macos-monterey" ]]; then
-        brew install node@22 || true
-        npm install -g yarn
+        sudo apt-get install -y nodejs npm yarn build-essential python3 g++
       fi
 
-  # Common installation for all platforms
-  - ps: |
-      Write-Host "Installing project dependencies with Yarn..."
-      yarn install --frozen-lockfile
-  - sh: yarn install --frozen-lockfile
+  # Common for all platforms
+  - yarn install --frozen-lockfile
 
 build_script:
-  # Building the project using Yarn on all platforms
+  # Windows build
   - ps: |
-      Write-Host "Building on Windows..."
-      yarn dist
+      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2022") {
+        Write-Host "Building on Windows..."
+        yarn dist
+      }
+
+  # Unix builds
   - sh: |
-      echo "Building on Unix systems..."
-      yarn dist
+      if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "macos-monterey" || "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]]; then
+        echo "Building on Unix systems..."
+        yarn dist
+      fi
 
 artifacts:
-  - path: dist/*.exe # Windows executable
-  - path: dist/*.dmg # macOS disk image
-  - path: dist/*.AppImage # Linux AppImage package
+  - path: dist/*.exe
+  - path: dist/*.dmg
+  - path: dist/*.AppImage
 
 test: false
