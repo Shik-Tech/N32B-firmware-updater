@@ -1,67 +1,21 @@
-version: "3.0.{build}"
-
-# Define build images for each platform
+version: 3.0.{build}
+branches:
+  only:
+    - master
 image:
-  - Visual Studio 2022
   - macos-monterey
+  - Visual Studio 2022
   - Ubuntu2204
-
-platform:
-  - x64
-
+platform: x64
 environment:
   nodejs_version: "22"
-
 install:
-  # Windows setup
-  - ps: |
-      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2022") {
-        Write-Host "Installing Node.js $env:nodejs_version for Windows"
-        Install-Product node $env:nodejs_version
-        npm install -g yarn
-        npm install -g node-gyp
-        $env:GYP_MSVS_VERSION = "2022"
-      }
-
-  # macOS setup (Updated)
-  - sh: |
-      if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "macos-monterey" ]]; then
-        brew install node@22
-        echo 'export PATH="/usr/local/opt/node@22/bin:$PATH"' >> ~/.bash_profile
-        source ~/.bash_profile
-        npm install -g yarn
-        npm install -g node-gyp
-      fi
-
-  # Ubuntu setup
-  - sh: |
-      if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]]; then
-        sudo apt-get update
-        sudo apt-get install -y nodejs npm yarn build-essential python3 g++
-      fi
-
-  # Common for all platforms
-  - yarn install --frozen-lockfile
-
+  - sh: npm install -g yarn
 build_script:
-  # Windows build with added troubleshooting for node-gyp
-  - ps: |
-      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2022") {
-        Write-Host "Building on Windows..."
-        npm config set python python3
-        yarn dist
-      }
-
-  # Unix builds
-  - sh: |
-      if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "macos-monterey" || "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]]; then
-        echo "Building on Unix systems..."
-        yarn dist
-      fi
-
+  - sh: if [ "$env:OS" != "Windows_NT" ]; then yarn dist; fi
+  - ps: if ($env:OS -eq "Windows_NT") { yarn dist }
 artifacts:
   - path: dist/*.exe
   - path: dist/*.dmg
   - path: dist/*.AppImage
-
 test: false
