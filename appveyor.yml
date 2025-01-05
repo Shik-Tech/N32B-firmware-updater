@@ -18,10 +18,10 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  # Windows: Install Node.js and Yarn properly
+  # Windows: Using the recommended Appveyor method with Install-Product
   - ps: |
       Write-Host "Installing Node.js $env:nodejs_version for Windows"
-      choco install nodejs --version $env:nodejs_version -y
+      Install-Product node $env:nodejs_version
       npm install -g yarn
 
   # macOS and Ubuntu: Use package managers directly
