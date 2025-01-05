@@ -21,6 +21,8 @@ install:
   - ps: |
       if ($env:APPVEYOR_BUILD_WORKER_IMAGE -match "Visual Studio") {
           choco install nvm
+          # Manually refresh the environment variables to ensure nvm is recognized
+          $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine)
           nvm install $env:nodejs_version
           nvm use $env:nodejs_version
       }
