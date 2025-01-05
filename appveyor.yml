@@ -1,4 +1,4 @@
-version: "{build}"
+version: "3.0.{build}"
 
 # Define build images for each platform
 image:
