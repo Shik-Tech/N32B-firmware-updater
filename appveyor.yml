@@ -9,7 +9,7 @@ platform:
   - x64
 
 environment:
-  nodejs_version: 22.12.0
+  nodejs_version: 22
 
 cache:
   - node_modules
@@ -18,12 +18,9 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - ps: |
-      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -match "Visual Studio") {
-          choco install nodejs --version=$env:nodejs_version --allow-downgrade -y
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-          refreshenv
-      }
+  # Install the specified version of Node.js
+  - ps: Install-Product node $env:nodejs_version
+  # Install project dependencies
   - sh: |
       if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]; then
           sudo apt-get update
