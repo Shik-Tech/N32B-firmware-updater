@@ -1,7 +1,7 @@
 version: "3.0.{build}"
 
 image:
-  - Visual Studio 2019
+  - Visual Studio 2022
   - macos-monterey
   - Ubuntu2204
 
@@ -9,7 +9,7 @@ platform:
   - x64
 
 environment:
-  nodejs_version: 22
+  nodejs_version: "22"
 
 cache:
   - node_modules
@@ -18,7 +18,7 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  # Install the specified version of Node.js
+  # Get the latest stable version of Node.js
   - ps: Install-Product node $env:nodejs_version
   # Install project dependencies
   - sh: |
