@@ -20,11 +20,9 @@ init:
 install:
   - ps: |
       if ($env:APPVEYOR_BUILD_WORKER_IMAGE -match "Visual Studio") {
-          choco install nvm
-          # Use the direct path to nvm since the PATH might not be refreshed immediately
-          $nvmPath = "C:\ProgramData\chocolatey\lib\nvm.install\tools\nvm.exe"
-          & $nvmPath install $env:nodejs_version
-          & $nvmPath use $env:nodejs_version
+          # Install Node.js 22 from Chocolatey (example version may need adjusting)
+          choco install nodejs --version=%nodejs_version% -y
+          refreshenv
       }
   - sh: |
       if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]; then
