@@ -1,7 +1,7 @@
 {
   "name": "n32b-firmware-updater",
   "description": "N32B midi controller firmware updater",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "author": {
     "name": "Shik",
     "email": "info@shik.tech",
@@ -13,7 +13,7 @@
   "build": {
     "appId": "tech.shik.updater.firmware",
     "productName": "N32B Firmware updater",
-    "copyright": "Copyright © 2024 SHIK",
+    "copyright": "Copyright © 2025 SHIK",
     "files": [
       "build/**/*",
       "assets/icon.*",

@@ -4,7 +4,13 @@ const firmwares = [
         firwmareOptions: [
             {
                 name: 'Advanced Macros+',
-                version: '4.5.4',
+                version: '4.5.5',
+                value: 'firmware_v4.5.5.hex',
+                description: 'RPN/NRPN Bug fixes'
+            },
+            {
+                name: 'Advanced Macros+',
+                version: '4.5.5',
                 value: 'firmware_v4.5.4.hex',
                 description: 'Bug fixes'
             },
@@ -43,6 +49,12 @@ const firmwares = [
     {
         name: 'N32B V3',
         firwmareOptions: [
+            {
+                name: 'Advanced Macros+',
+                version: '4.5.5',
+                value: 'firmware_v4.5.5.hex',
+                description: 'RPN/NRPN Bug fixes'
+            },
             {
                 name: 'Advanced Macros+',
                 version: '4.5.4',
