@@ -10,11 +10,12 @@ platform: x64
 environment:
   nodejs_version: "22"
 install:
+  - cmd: powershell Install-Product node $env:nodejs_version x64
   - ps: |
       if ($env:OS -eq "Windows_NT") {
         Install-Product node $env:nodejs_version
         choco install python2 -y
-        choco install visualstudio2019buildtools -y
+        choco install visualstudio2022buildtools -y
         npm install -g yarn
         yarn install
       }
@@ -26,8 +27,7 @@ install:
         yarn install
       fi
 build_script:
-  - ps: if ($env:OS -eq "Windows_NT") { yarn dist }
-  - sh: if [ "$env:OS" != "Windows_NT" ]; then yarn dist; fi
+  - yarn dist
 artifacts:
   - path: dist/*.exe
   - path: dist/*.dmg
