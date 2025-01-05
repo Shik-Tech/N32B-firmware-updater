@@ -10,7 +10,7 @@ const firmwares = [
             },
             {
                 name: 'Advanced Macros+',
-                version: '4.5.5',
+                version: '4.5.4',
                 value: 'firmware_v4.5.4.hex',
                 description: 'Bug fixes'
             },
