@@ -10,8 +10,19 @@ platform: x64
 environment:
   nodejs_version: "22"
 install:
-  - ps: if ($env:OS -eq "Windows_NT") { npm install -g yarn }
-  - sh: if [ "$env:OS" != "Windows_NT" ]; then npm install -g yarn; fi
+  - ps: |
+      if ($env:OS -eq "Windows_NT") {
+        Install-Product node $env:nodejs_version
+        npm install -g yarn
+        yarn install
+      }
+  - sh: |
+      if [ "$env:OS" != "Windows_NT" ]; then
+        . $HOME/.nvm/nvm.sh
+        nvm install $env:nodejs_version
+        npm install -g yarn
+        yarn install
+      fi
 build_script:
   - ps: if ($env:OS -eq "Windows_NT") { yarn dist }
   - sh: if [ "$env:OS" != "Windows_NT" ]; then yarn dist; fi
