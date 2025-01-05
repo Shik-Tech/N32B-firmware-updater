@@ -1,9 +1,9 @@
 version: "3.0.{build}"
 
 image:
-  - macOS
-  - Visual Studio 2017
-  - Ubuntu
+  - macos-monterey
+  - Visual Studio 2019
+  - Ubuntu2204 # Newer Ubuntu version with GLIBC 2.28 support
 
 platform:
   - x64
@@ -18,8 +18,17 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - cmd: powershell Install-Product node $env:nodejs_version x64
-  - sh: nvm install $nodejs_version
+  - ps: |
+      if ($env:APPVEYOR_BUILD_WORKER_IMAGE -match "Visual Studio") {
+          choco install nvm
+          nvm install $env:nodejs_version
+          nvm use $env:nodejs_version
+      }
+  - sh: |
+      if [ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu2204" ]; then
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+      fi
   - npm install -g yarn
   - yarn
 
