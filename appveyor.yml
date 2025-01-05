@@ -1,9 +1,9 @@
 version: "3.0.{build}"
 
 image:
-  - macos-monterey
   - Visual Studio 2019
-  - Ubuntu2204 # Newer Ubuntu version with GLIBC 2.28 support
+  - macos-monterey
+  - Ubuntu2204
 
 platform:
   - x64
@@ -20,8 +20,8 @@ init:
 install:
   - ps: |
       if ($env:APPVEYOR_BUILD_WORKER_IMAGE -match "Visual Studio") {
-          # Install Node.js 22 from Chocolatey (example version may need adjusting)
-          choco install nodejs --version=%nodejs_version% -y
+          choco install nodejs --version=$env:nodejs_version --allow-downgrade -y
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           refreshenv
       }
   - sh: |
