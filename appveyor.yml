@@ -3,17 +3,18 @@ branches:
   only:
     - master
 image:
-  - macos-monterey
   - Visual Studio 2022
+  - macos-monterey
   - Ubuntu2204
 platform: x64
 environment:
   nodejs_version: "22"
 install:
-  - sh: npm install -g yarn
+  - ps: if ($env:OS -eq "Windows_NT") { npm install -g yarn }
+  - sh: if [ "$env:OS" != "Windows_NT" ]; then npm install -g yarn; fi
 build_script:
-  - sh: if [ "$env:OS" != "Windows_NT" ]; then yarn dist; fi
   - ps: if ($env:OS -eq "Windows_NT") { yarn dist }
+  - sh: if [ "$env:OS" != "Windows_NT" ]; then yarn dist; fi
 artifacts:
   - path: dist/*.exe
   - path: dist/*.dmg
