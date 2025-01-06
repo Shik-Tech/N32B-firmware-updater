@@ -5,14 +5,16 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch:
-
+      
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -27,15 +29,8 @@ jobs:
       - name: Install Yarn
         run: npm install -g yarn
 
-      - name: Clean Electron-Builder Cache (Linux only)
-        if: matrix.os == 'ubuntu-latest'
-        run: rm -rf ~/.cache/electron-builder
-
       - name: Install Dependencies
         run: yarn install --frozen-lockfile --network-timeout 1000000
-
-      - name: Build Application
-        run: yarn build
 
       - name: Package Application (Electron Builder)
         run: yarn dist
@@ -56,6 +51,9 @@ jobs:
       packages: write
       actions: write
 
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -72,8 +70,6 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           files: release-assets/*
           tag_name: v${{ github.run_number }}
