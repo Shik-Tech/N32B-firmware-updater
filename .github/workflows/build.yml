@@ -62,11 +62,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist
-
+      
       - name: Prepare Files for Release
         run: |
-          mkdir -p release-assets
-          cp dist/*.{exe,dmg,AppImage} release-assets/
+            mkdir -p release-assets
+            cp dist/build-windows-latest/*.exe release-assets/ || true
+            cp dist/build-macos-latest/*.dmg release-assets/ || true
+            cp dist/build-ubuntu-latest/*.AppImage release-assets/ || true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
