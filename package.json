@@ -31,15 +31,12 @@
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "gatekeeperAssess": false,
-      "afterSign": "scripts/notarize.js"
+      "gatekeeperAssess": false
     },
-    "win": {
-      "target": "nsis"
+    "dmg": {
+      "sign": true
     },
-    "linux": {
-      "target": "AppImage"
-    }
+    "afterSign": "scripts/notarize.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
