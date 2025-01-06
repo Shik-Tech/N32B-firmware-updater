@@ -27,9 +27,12 @@ jobs:
       - name: Install Yarn
         run: npm install -g yarn
 
+      - name: Clean Electron-Builder Cache (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: rm -rf ~/.cache/electron-builder
+
       - name: Install Dependencies
-        run: |
-          yarn install --frozen-lockfile --network-timeout 1000000 || yarn install --frozen-lockfile --network-timeout 1000000
+        run: yarn install --frozen-lockfile --network-timeout 1000000
 
       - name: Build Application
         run: yarn build
@@ -44,11 +47,15 @@ jobs:
           path: |
             dist/
             !dist/**/*.map
-          retention-days: 7
 
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      actions: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -58,12 +65,17 @@ jobs:
         with:
           path: dist
 
+      - name: Prepare Files for Release
+        run: |
+          mkdir -p release-assets
+          cp dist/*.{exe,dmg,AppImage} release-assets/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          files: dist/**/*.{exe,dmg,AppImage}
+          files: release-assets/*
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           body: "Automated release from CI pipeline"
