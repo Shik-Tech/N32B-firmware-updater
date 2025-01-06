@@ -31,12 +31,15 @@
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "afterSign": "scripts/notarize.js"
     },
-    "dmg": {
-      "sign": true
+    "win": {
+      "target": "nsis"
     },
-    "afterSign": "scripts/notarize.js"
+    "linux": {
+      "target": "AppImage"
+    }
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
@@ -86,6 +89,7 @@
     "concurrently": "^6.2.0",
     "electron": "^13.1.6",
     "electron-builder": "23.6.0",
+    "electron-notarize": "^1.2.2",
     "wait-on": "^6.0.0"
   }
 }
