@@ -28,7 +28,8 @@ jobs:
         run: npm install -g yarn
 
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          yarn install --frozen-lockfile --network-timeout 1000000 || yarn install --frozen-lockfile --network-timeout 1000000
 
       - name: Build Application
         run: yarn build
@@ -59,9 +60,10 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           files: dist/**/*.{exe,dmg,AppImage}
-          token: ${{ secrets.GH_TOKEN }}
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           body: "Automated release from CI pipeline"
