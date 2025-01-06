@@ -36,6 +36,12 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile --network-timeout 1000000
+      
+      - name: Copy Entitlements for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p build
+          cp public/entitlements.mac.plist build/
 
       - name: Setup macOS Certificate
         if: matrix.os == 'macos-latest'
