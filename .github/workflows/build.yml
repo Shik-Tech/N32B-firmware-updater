@@ -15,7 +15,6 @@ jobs:
 
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      npm_config_script_shell: cmd.exe
 
     steps:
       - name: Checkout repository
@@ -26,11 +25,6 @@ jobs:
         with:
           node-version: 22
           cache: 'yarn'
-
-      - name: Install Windows Build Tools (Windows only)
-        if: runner.os == 'Windows'
-        run: |
-          npm install --global --production windows-build-tools
 
       - name: Install Yarn
         run: npm install -g yarn
