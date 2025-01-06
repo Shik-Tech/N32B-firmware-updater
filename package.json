@@ -43,13 +43,13 @@
     "webmidi": "^3.1.8"
   },
   "scripts": {
-    "start": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
-    "dist": "NODE_OPTIONS=--openssl-legacy-provider yarn build && electron-builder",
-    "test": "NODE_OPTIONS=--openssl-legacy-provider react-scripts test",
-    "eject": "NODE_OPTIONS=--openssl-legacy-provider react-scripts eject",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "dist": "yarn build && electron-builder",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "postinstall": "electron-builder install-app-deps",
-    "dev": "concurrently \"NODE_OPTIONS=--openssl-legacy-provider BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\""
+    "dev": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "eslintConfig": {
     "extends": "react-app"
