@@ -72,29 +72,19 @@ jobs:
       packages: write
       actions: write
 
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Build Artifacts
+      - name: Download All Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: dist
-      
-      - name: Prepare Files for Release
-        run: |
-            mkdir -p release-assets
-            cp dist/build-windows-latest/*.exe release-assets/
-            cp dist/build-macos-latest/*.dmg release-assets/
-            cp dist/build-ubuntu-latest/*.AppImage release-assets/
+          path: release-assets
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/*
+          files: release-assets/**/*
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           body: "Automated release from CI pipeline"
