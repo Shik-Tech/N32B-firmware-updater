@@ -25,8 +25,7 @@
     "buildDependenciesFromSource": true,
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ],
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
@@ -35,6 +34,11 @@
     },
     "dmg": {
       "sign": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
     },
     "afterSign": "scripts/notarize.js"
   },
