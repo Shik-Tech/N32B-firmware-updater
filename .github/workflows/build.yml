@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - master
+  release:
+    types: [published]
       
 jobs:
   build:
@@ -14,7 +16,6 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       CSC_LINK: ${{ secrets.CSC_LINK }}
       CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
       APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -36,7 +37,7 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile --network-timeout 1000000
-      
+
       - name: Copy Entitlements for macOS
         if: matrix.os == 'macos-latest'
         run: |
@@ -72,31 +73,48 @@ jobs:
       packages: write
       actions: write
 
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Build Artifacts
+      - name: Download Windows Build Artifact
         uses: actions/download-artifact@v4
         with:
-          path: dist
-      
-      - name: Prepare Files for Release
-        run: |
-            mkdir -p release-assets
-            cp dist/build-windows-latest/*.exe release-assets/ || true
-            cp dist/build-macos-latest/*.dmg release-assets/ || true
-            cp dist/build-ubuntu-latest/*.AppImage release-assets/ || true
+          name: build-windows-latest
+          path: ./artifacts/windows
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Download MacOS Build Artifact
+        uses: actions/download-artifact@v4
         with:
-          files: release-assets/*
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          body: "Automated release from CI pipeline"
-          draft: false
-          prerelease: false
+          name: build-macos-latest
+          path: ./artifacts/macos
+
+      - name: Download Ubuntu Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ubuntu-latest
+          path: ./artifacts/ubuntu
+
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifacts/windows/*.exe
+          asset_name: N32B-Updater-Windows.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload MacOS Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifacts/macos/*.dmg
+          asset_name: N32B-Updater-Mac.dmg
+          asset_content_type: application/octet-stream
+
+      - name: Upload Ubuntu Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./artifacts/ubuntu/*.AppImage
+          asset_name: N32B-Updater-Ubuntu.AppImage
+          asset_content_type: application/octet-stream
