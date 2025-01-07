@@ -79,15 +79,23 @@ jobs:
       - name: Download All Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: release-assets
-
+          path: downloaded-artifacts
+      
+      - name: Collect Relevant Release Files
+        run: |
+          mkdir -p release-assets
+          find downloaded-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-assets/ \;
+  
       - name: Debug Release Files
         run: ls -R release-assets/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/**/*
+          files: |
+            release-assets/*.dmg
+            release-assets/*.exe
+            release-assets/*.AppImage
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           body: "Automated release from CI pipeline"
