@@ -100,7 +100,8 @@ jobs:
       - name: Collect Relevant Release Files
         run: |
           mkdir -p release-assets
-          find downloaded-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-assets/ \;
+          find downloaded-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) \
+          ! -name "ffmpeg.exe" -exec cp {} release-assets/ \;
   
       - name: Debug Release Files
         run: ls -R release-assets/
