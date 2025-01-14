@@ -1,3 +1,5 @@
+[![Build and Release App](https://github.com/Shik-Tech/N32B-firmware-updater/actions/workflows/build.yml/badge.svg)](https://github.com/Shik-Tech/N32B-firmware-updater/actions/workflows/build.yml)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
