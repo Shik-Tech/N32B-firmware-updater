@@ -60,13 +60,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: yarn dist --linux
 
-      - name: Package Application for macOS x64
+      - name: Package Application for macOS
         if: matrix.os == 'macos-latest'
-        run: yarn dist --mac --x64
-      
-      - name: Package Application for macOS arm64
-        if: matrix.os == 'macos-latest'
-        run: yarn dist --mac --arm64
+        run: yarn dist --mac
       
       - name: Package Application for Windows
         if: matrix.os == 'windows-latest'
