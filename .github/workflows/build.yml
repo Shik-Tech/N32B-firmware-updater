@@ -53,17 +53,22 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
 
-      - name: Package Application for Ubuntu (Electron Builder)
+      - name: Build React App
+        run: yarn build
+
+      - name: Package Application for Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: yarn dist --linux
 
-      - name: Package Application for macOS (Electron Builder)
+      - name: Package Application for macOS x64
         if: matrix.os == 'macos-latest'
-        run: |
-          yarn dist --mac --x64
-          yarn dist --mac --arm64
+        run: yarn dist --mac --x64
       
-      - name: Package Application for Windows (Electron Builder)
+      - name: Package Application for macOS arm64
+        if: matrix.os == 'macos-latest'
+        run: yarn dist --mac --arm64
+      
+      - name: Package Application for Windows
         if: matrix.os == 'windows-latest'
         run: yarn dist --win
 
