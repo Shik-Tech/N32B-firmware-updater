@@ -54,7 +54,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
 
       - name: Package Application (Electron Builder)
-        run: yarn dist
+        run: yarn dist --mac --win --universal
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4

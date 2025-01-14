@@ -27,6 +27,10 @@
       "target": [
         "dmg"
       ],
+      "arch": [
+        "x64",
+        "arm64"
+      ],
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
@@ -53,6 +57,7 @@
     "@testing-library/user-event": "^13.1.9",
     "avrgirl-arduino": "^5.0.1",
     "electron-is-dev": "^2.0.0",
+    "ffmpeg-static": "^5.2.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
