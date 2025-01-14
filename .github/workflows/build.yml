@@ -59,7 +59,9 @@ jobs:
 
       - name: Package Application for macOS (Electron Builder)
         if: matrix.os == 'macos-latest'
-        run: yarn dist --mac --universal
+        run: |
+          yarn dist --mac --x64
+          yarn dist --mac --arm64
       
       - name: Package Application for Windows (Electron Builder)
         if: matrix.os == 'windows-latest'
