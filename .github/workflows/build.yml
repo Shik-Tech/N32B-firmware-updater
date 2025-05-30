@@ -56,12 +56,6 @@ jobs:
       - name: Build React App
         run: yarn build
 
-      - name: Setup FFmpeg for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          if (!(Test-Path -Path "build")) { New-Item -ItemType Directory -Path "build" }
-          Copy-Item -Path "node_modules/ffmpeg-static/ffmpeg" -Destination "build/ffmpeg.exe"
-
       - name: Package Application for Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: yarn dist --linux
