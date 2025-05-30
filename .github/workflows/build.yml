@@ -59,9 +59,9 @@ jobs:
       - name: Setup FFmpeg for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          mkdir -p build
-          cp node_modules/ffmpeg-static/ffmpeg.exe build/
-          cp node_modules/ffmpeg-static/ffmpeg.dll build/
+          if (!(Test-Path -Path "build")) { New-Item -ItemType Directory -Path "build" }
+          Copy-Item -Path "node_modules/ffmpeg-static/ffmpeg.exe" -Destination "build/"
+          Copy-Item -Path "node_modules/ffmpeg-static/ffmpeg.dll" -Destination "build/"
 
       - name: Package Application for Ubuntu
         if: matrix.os == 'ubuntu-latest'
