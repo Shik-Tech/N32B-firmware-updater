@@ -23,36 +23,42 @@
       "./hexs/"
     ],
     "buildDependenciesFromSource": true,
-    "win": {
-      "target": [
-        "portable"
-      ]
-    },
-    "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "arch": "x64"
+    "electron": {
+      "bundler": "builder",
+      "packager": {},
+      "builder": {
+        "appId": "tech.shik.updater.firmware",
+        "productName": "N32B Firmware updater",
+        "win": {
+          "target": "nsis"
         },
-        {
-          "target": "dmg",
-          "arch": "arm64"
-        }
-      ],
-      "hardenedRuntime": true,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "gatekeeperAssess": false
-    },
-    "dmg": {
-      "sign": true
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ]
-    },
-    "afterSign": "scripts/notarize.js"
+        "mac": {
+          "target": [
+            {
+              "target": "dmg",
+              "arch": "x64"
+            },
+            {
+              "target": "dmg",
+              "arch": "arm64"
+            }
+          ],
+          "hardenedRuntime": true,
+          "entitlements": "build/entitlements.mac.plist",
+          "entitlementsInherit": "build/entitlements.mac.plist",
+          "gatekeeperAssess": false
+        },
+        "dmg": {
+          "sign": true
+        },
+        "linux": {
+          "target": [
+            "AppImage"
+          ]
+        },
+        "afterSign": "scripts/notarize.js"
+      }
+    }
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
