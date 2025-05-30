@@ -28,7 +28,7 @@
         "nsis"
       ],
       "signAndEditExecutable": true,
-      "signExts": [".exe", ".dll"],
+      "signDlls": true,
       "requestedExecutionLevel": "asInvoker"
     },
     "mac": {
