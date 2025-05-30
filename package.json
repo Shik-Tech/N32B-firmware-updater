@@ -25,7 +25,7 @@
     "buildDependenciesFromSource": true,
     "win": {
       "target": [
-        "nsis"
+        "portable"
       ],
       "signAndEditExecutable": true,
       "signDlls": true,
@@ -63,12 +63,8 @@
     "@fontsource/roboto": "^5.0.1",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.3",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^12.0.0",
-    "@testing-library/user-event": "^13.1.9",
     "avrgirl-arduino": "^5.0.1",
     "electron-is-dev": "^2.0.0",
-    "ffmpeg-static": "^5.2.0",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
