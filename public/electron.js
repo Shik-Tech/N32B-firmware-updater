@@ -1,13 +1,9 @@
 const { app, BrowserWindow } = require('electron');
 const isDev = require('electron-is-dev');
 const path = require('path');
-const ffmpeg = require('ffmpeg-static-electron');
 
 app.commandLine.appendSwitch('enable-features', 'ElectronSerialChooser');
 app.allowRendererProcessReuse = false;
-
-// Set ffmpeg path for the application
-process.env.FFMPEG_PATH = ffmpeg.path;
 
 function createWindow() {
     let appWindow = new BrowserWindow({
