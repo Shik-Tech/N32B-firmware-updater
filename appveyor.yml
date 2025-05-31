@@ -24,8 +24,13 @@ install:
 build_script:
   - yarn build
   - yarn dist --win
+  - cmd: dir dist
+  - cmd: dir dist\win-unpacked
+  - cmd: dir build
+  - cmd: dir public
 
 artifacts:
-  - path: dist/*.exe # Windows
+  - path: dist\*.exe
+  - path: dist\win-unpacked\*.exe
 
 test: false
