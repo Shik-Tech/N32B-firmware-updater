@@ -22,7 +22,8 @@ install:
   - yarn
 
 build_script:
-  - yarn dist
+  - yarn build
+  - yarn dist --win
 
 artifacts:
   - path: dist/*.exe # Windows
