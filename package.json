@@ -25,7 +25,7 @@
     "buildDependenciesFromSource": true,
     "win": {
       "target": [
-        "portable"
+        "nsis"
       ],
       "signAndEditExecutable": true,
       "signDlls": true,

@@ -23,7 +23,7 @@ install:
 
 build_script:
   - yarn build
-  - yarn dist --win
+  - yarn dist --win nsis
   - cmd: dir dist
   - cmd: dir dist\win-unpacked
   - cmd: dir build
