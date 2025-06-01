@@ -4,7 +4,7 @@ import { Alert, AppBar, Box, Button, CssBaseline, Divider, FormControl, InputLab
 import {
   UploadFileRounded as UploadFileRoundedIcon,
   RotateRight as RotateRightIcon
-} from '@mui/icons-material/';
+} from '@mui/icons-material';
 import { WebMidi } from "webmidi";
 import firmwares from './firmwares';
 import logo from './shik-logo-white.png';
