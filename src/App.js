@@ -12,10 +12,6 @@ import { SEND_FIRMWARE_VERSION } from './commands';
 import DialogBox from './components/DialogBox/DialogBox';
 import styled from '@emotion/styled';
 
-const Avrgirl = window.require('avrgirl-arduino');
-const { SerialPort } = window.require('serialport');
-const { ipcRenderer } = window.require('electron');
-
 const RotatingIcon = styled(RotateRightIcon)({
   '@keyframes rotateAnimation': {
     from: { transform: 'rotate(0deg)' },
@@ -48,14 +44,14 @@ function App() {
 
   useEffect(() => {
     // Listen to the 'resources-path' event from the main process
-    ipcRenderer.on('resources-path', (event, path) => {
-      setResourcesPath(path);
+    window.api.receive('fromMain', (data) => {
+      if (data.type === 'resourcesPath') {
+        setResourcesPath(data.path);
+      }
     });
 
-    // Clean up the event listener when the component unmounts
-    return () => {
-      ipcRenderer.removeAllListeners('resources-path');
-    };
+    // Request resources path from main process
+    window.api.send('toMain', { type: 'getResourcesPath' });
   }, []);
 
   useEffect(() => {
@@ -69,7 +65,6 @@ function App() {
     return () => {
       if (midiInput) {
         midiInput.removeListener('sysex', handleFirmwareSysEx);
-
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,77 +108,51 @@ function App() {
 
   WebMidi.enable({ sysex: true });
 
-  const vendorIds = ['2341', '1b4f', '1B4F', '1d50', '1D50'];
-
-  // Find the port for Arduino Pro Micro to trigger reset
-  async function findResetPort() {
-    let resetPort;
-
-    Avrgirl.list((err, ports) => {
-      resetPort = ports.find((port) => {
-        // console.log("Reset ports", port);
-        return vendorIds.find(vendorId => vendorId === port.vendorId);
-      });
-    });
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    if (!resetPort) {
-      throw new Error('Arduino Pro Micro reset port not found');
-    }
-    return resetPort.path;
-  }
-
-  // Find the port for Arduino to upload hex file
-  async function findUploadPort() {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    let uploadPort;
-    Avrgirl.list((err, ports) => {
-      uploadPort = ports.find((port) => {
-        // console.log("Upload ports", port);
-        return vendorIds.find(vendorId => vendorId === port.vendorId);
-      });
-    });
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    if (uploadPort.length === 0) {
-      throw new Error('Arduino upload port not found');
-    }
-
-    return uploadPort.path;
-  }
-
   const handleUpload = async () => {
     setIsUploading(true);
     setAlertIndex(0);
     handleOpenModal();
 
     try {
-      const resetPort = await findResetPort();
-      // Trigger reset on Arduino Pro Micro
-      const arduinoResetPort = new SerialPort({ path: resetPort, baudRate: 1200 });
-      arduinoResetPort.on('open', () => {
-        arduinoResetPort.close(async () => {
-          const uploadPort = await findUploadPort();
-          const avrgirl = new Avrgirl({
-            board: 'micro',
-            port: uploadPort,
-            manualReset: true
-          });
-          const rootFolder = midiOutput.name === 'SHIK N32B V3' ? 'v3' : 'v2';
-          const filePath = `${resourcesPath}/hexs/${rootFolder}/${selectedFile}`;
-
-          await avrgirl.flash(filePath, (error) => {
-            setIsUploading(false);
-
-            if (error) {
-              setAlertIndex(2);
-              console.error(error);
-            } else {
-              setAlertIndex(1);
-              console.log('Upload complete');
+      // Request reset port from main process
+      window.api.send('toMain', { type: 'findResetPort' });
+      
+      // Listen for reset port response
+      window.api.receive('fromMain', async (data) => {
+        if (data.type === 'resetPort') {
+          const resetPort = data.data;
+          
+          // Request upload port
+          window.api.send('toMain', { type: 'findUploadPort' });
+          
+          // Listen for upload port response
+          window.api.receive('fromMain', async (data) => {
+            if (data.type === 'uploadPort') {
+              const uploadPort = data.data;
+              const rootFolder = midiOutput.name === 'SHIK N32B V3' ? 'v3' : 'v2';
+              const filePath = `${resourcesPath}/hexs/${rootFolder}/${selectedFile}`;
+              
+              // Request firmware upload
+              window.api.send('toMain', { 
+                type: 'uploadFirmware',
+                filePath,
+                uploadPort
+              });
+              
+              // Listen for upload completion
+              window.api.receive('fromMain', (data) => {
+                if (data.type === 'uploadComplete') {
+                  setIsUploading(false);
+                  setAlertIndex(1);
+                } else if (data.type === 'error') {
+                  setIsUploading(false);
+                  setAlertIndex(2);
+                  console.error(data.error);
+                }
+              });
             }
           });
-        });
+        }
       });
     } catch (error) {
       setIsUploading(false);
@@ -271,7 +240,6 @@ function App() {
             <Typography>
               Connecting to {midiOutput.name}...
             </Typography>
-
           </Alert>
         }
 
