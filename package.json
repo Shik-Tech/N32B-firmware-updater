@@ -77,7 +77,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron:dev": "concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:dev": "cross-env APP_DEV=true concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:package": "react-scripts build && electron-forge package",
     "electron:make": "react-scripts build && electron-forge make"
   },
@@ -108,8 +108,8 @@
     "@electron-forge/plugin-fuses": "^7.8.1",
     "@electron/fuses": "^1.8.0",
     "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "electron": "^36.3.2",
-    "electron-is-dev": "^3.0.1",
     "electron-notarize": "^1.2.2",
     "wait-on": "^8.0.3"
   }

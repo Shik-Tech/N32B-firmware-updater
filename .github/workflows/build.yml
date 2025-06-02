@@ -53,28 +53,15 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
 
-      - name: Build React App
-        run: yarn build
-
-      - name: Package Application for Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: yarn dist --linux
-
-      - name: Package Application for macOS
-        if: matrix.os == 'macos-latest'
-        run: yarn dist --mac
-      
-      - name: Package Application for Windows
-        if: matrix.os == 'windows-latest'
-        run: yarn dist --win
+      - name: Build and Package Application
+        run: yarn electron:make
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.os }}
           path: |
-            dist/
-            !dist/**/*.map
+            out/make/**/!(*.blockmap|*.yml|*.map|*.txt)
 
   release:
     needs: build
@@ -96,8 +83,8 @@ jobs:
       - name: Collect Relevant Release Files
         run: |
           mkdir -p release-assets
-          find downloaded-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) -exec cp {} release-assets/ \;
-  
+          find downloaded-artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.zip" \) -exec cp {} release-assets/ \;
+
       - name: Debug Release Files
         run: ls -R release-assets/
 
@@ -105,9 +92,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release-assets/*.dmg
-            release-assets/*.exe
-            release-assets/*.AppImage
+            release-assets/*
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
           body: "Automated release from CI pipeline"
