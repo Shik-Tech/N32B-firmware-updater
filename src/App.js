@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { find, get } from 'lodash';
 import {
-  Alert, AppBar, Box, Button, Card, CardContent, CardHeader, CssBaseline, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Toolbar, Typography, Stepper, Step, StepLabel
+  Alert, AppBar, Box, Button, Card, CardContent, CardHeader, CssBaseline, FormControl, InputLabel, MenuItem, Select, Stack, Toolbar, Typography, Stepper, Step, StepLabel
 } from '@mui/material';
 import {
   UploadFileRounded as UploadFileRoundedIcon,
@@ -13,6 +13,8 @@ import logo from './shik-logo-white.png';
 import { SEND_FIRMWARE_VERSION } from './commands';
 import DialogBox from './components/DialogBox/DialogBox';
 import styled from '@emotion/styled';
+
+const appVersion = require('../package.json').version;
 
 const RotatingIcon = styled(RotateRightIcon)({
   '@keyframes rotateAnimation': {
@@ -278,7 +280,8 @@ function App() {
         </Card>
       </Box>
       <Box component="footer" py={2} textAlign="center" color="text.secondary" fontSize={12}>
-        &copy; {new Date().getFullYear()} SHIK. All rights reserved.
+        &copy; {new Date().getFullYear()} SHIK. All rights reserved.<br />
+        <span style={{ opacity: 0.7 }}>v{appVersion}</span>
       </Box>
       <DialogBox
         openModal={openModal}
