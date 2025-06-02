@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { find, get } from 'lodash';
-import { Alert, AppBar, Box, Button, CssBaseline, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
+import {
+  Alert, AppBar, Box, Button, Card, CardContent, CardHeader, CssBaseline, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Toolbar, Typography, Stepper, Step, StepLabel
+} from '@mui/material';
 import {
   UploadFileRounded as UploadFileRoundedIcon,
   RotateRight as RotateRightIcon
@@ -19,6 +21,8 @@ const RotatingIcon = styled(RotateRightIcon)({
   },
   animation: 'rotateAnimation 2s linear infinite',
 });
+
+const steps = ['Connect Device', 'Select Firmware', 'Upload'];
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -189,103 +193,98 @@ function App() {
     };
   }, []);
 
+  // Stepper logic
+  let activeStep = 0;
+  if (deviceConnected) activeStep = 1;
+  if (deviceConnected && selectedFile) activeStep = 2;
+  if (uploadStatus === 'uploading') activeStep = 2;
+  if (uploadStatus === 'success') activeStep = 2;
+
   return (
-    <Box>
+    <Box minHeight="100vh" display="flex" flexDirection="column" bgcolor="background.default">
       <CssBaseline />
-      <AppBar component="nav">
-        <Toolbar>
-          <Box
-            component="img"
-            alt="SHIK logo"
-            src={logo}
-            sx={{
-              height: 20,
-              pt: 1,
-              mr: 2,
-            }}
-          />
-          <Typography sx={{ pt: 1, flexGrow: 1 }} variant="body2" component="div">
-            N32B Firmware updater
+      <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box component="img" alt="SHIK logo" src={logo} sx={{ height: 20 }} />
+          <Typography variant="body2" color="text.primary" fontWeight={500} letterSpacing={1}>
+            N32B Firmware Updater
           </Typography>
         </Toolbar>
       </AppBar>
-
-      <Box component="main" sx={{ p: 3 }}>
-        <Toolbar />
-        {(deviceConnected || uploadStatus === 'uploading') && firmwareVersion && deviceFirmwareOptions &&
-          <Stack
-            direction="column"
-            spacing={2}
-          >
-            <Alert severity={uploadStatus === 'error' ? 'error' : 'success'}>
-              {uploadStatus === 'error' ? 'Error updating firmware' : `Connected to ${midiOutput.name}`}
-            </Alert>
-
-            <Typography
-              sx={{
-                p: 1
-              }}
-            >Your current firmware version is: v{firmwareVersion.join('.')}</Typography>
-            <Divider />
-
-            <Stack
-              direction="row"
-              justifyContent="center"
-              spacing={2}
-              sx={{
-                pt: 2
-              }}
-            >
-              <FormControl>
-                <InputLabel id="firmware-select-label">Firmware</InputLabel>
-                <Select
-                  labelId="firmware-select-label"
-                  id="firmware-select"
-                  value={selectedFile}
-                  label="Firmware"
-                  onChange={handleFirmwareSelect}
-                  disabled={uploadStatus === 'uploading'}
-                >
-                  {deviceFirmwareOptions.map(firmware => (
-                    <MenuItem key={firmware.version} value={firmware.value}>{firmware.name} - v{firmware.version}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
+      <Box flex={1} display="flex" alignItems="center" justifyContent="center">
+        <Card sx={{ minWidth: 350, maxWidth: 420, width: '100%', p: 2, boxShadow: 6 }}>
+          <CardHeader
+            title={<Stepper activeStep={activeStep} alternativeLabel>
+              {steps.map(label => (
+                <Step key={label}><StepLabel>{label}</StepLabel></Step>
+              ))}
+            </Stepper>}
+            sx={{ pb: 0, background: 'none' }}
+          />
+          <CardContent>
+            <Stack spacing={3} alignItems="center">
+              {uploadStatus === 'error' && (
+                <Alert severity="error" sx={{ width: '100%' }}>
+                  Error updating firmware
+                </Alert>
+              )}
+              {uploadStatus === 'success' && (
+                <Alert severity="success" sx={{ width: '100%' }}>
+                  Firmware updated successfully!
+                </Alert>
+              )}
+              {!deviceConnected && uploadStatus === 'idle' && (
+                <Alert severity="warning" sx={{ width: '100%' }}>
+                  No device detected. Please connect your N32B MIDI controller.
+                </Alert>
+              )}
+              {deviceConnected && firmwareVersion && (
+                <Typography variant="body2" color="text.secondary">
+                  Current firmware version: <b>v{firmwareVersion.join('.')}</b>
+                </Typography>
+              )}
+              {deviceConnected && (
+                <FormControl fullWidth>
+                  <InputLabel id="firmware-select-label">Firmware</InputLabel>
+                  <Select
+                    labelId="firmware-select-label"
+                    id="firmware-select"
+                    value={selectedFile || ''}
+                    label="Firmware"
+                    onChange={handleFirmwareSelect}
+                    disabled={uploadStatus === 'uploading'}
+                  >
+                    {deviceFirmwareOptions.map(firmware => (
+                      <MenuItem key={firmware.version} value={firmware.value}>
+                        {firmware.name} - v{firmware.version}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
               <Button
                 onClick={handleUpload}
-                variant='contained'
-                startIcon={<UploadFileRoundedIcon />}
-                disabled={uploadStatus === 'uploading' || !isPortReady}
-                color={uploadStatus === 'error' ? 'error' : 'primary'}
+                variant="contained"
+                startIcon={uploadStatus === 'uploading' ? <RotatingIcon /> : <UploadFileRoundedIcon />}
+                disabled={uploadStatus === 'uploading' || !isPortReady || !deviceConnected || !selectedFile}
+                color="error"
+                size="large"
+                sx={{ width: '100%' }}
               >
-                {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload'}
+                {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload Firmware'}
               </Button>
             </Stack>
-          </Stack>
-        }
-
-        {deviceConnected && !firmwareVersion &&
-          <Alert severity='info' icon={<RotatingIcon />}>
-            <Typography>
-              Connecting to {midiOutput.name}...
-            </Typography>
-          </Alert>
-        }
-
-        {!deviceConnected && uploadStatus === 'idle' &&
-          <Alert severity="error">
-            No device detected.
-            <Typography>Please connect your N32B MIDI controller.</Typography>
-          </Alert>
-        }
-
-        <DialogBox
-          openModal={openModal}
-          handleCloseModal={handleCloseModal}
-          uploadStatus={uploadStatus}
-        />
+          </CardContent>
+        </Card>
       </Box>
+      <Box component="footer" py={2} textAlign="center" color="text.secondary" fontSize={12}>
+        &copy; {new Date().getFullYear()} SHIK. All rights reserved.
+      </Box>
+      <DialogBox
+        openModal={openModal}
+        handleCloseModal={handleCloseModal}
+        uploadStatus={uploadStatus}
+      />
     </Box>
   );
 }
