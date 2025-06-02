@@ -9,6 +9,21 @@ module.exports = {
       './hexs'
     ],
     icon: path.resolve(__dirname, 'images/icon'),
+    // macOS signing and notarization
+    osxSign: {
+      hardenedRuntime: true,
+      entitlements: path.resolve(__dirname, 'build/entitlements.mac.plist'),
+      'entitlements-inherit': path.resolve(__dirname, 'build/entitlements.mac.plist'),
+      'gatekeeper-assess': false
+    },
+    osxNotarize: {
+      appBundleId: 'tech.shik.updater.firmware',
+      appleId: process.env.APPLE_ID,
+      appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD,
+      teamId: process.env.APPLE_TEAM_ID,
+      tool: 'notarytool'
+    },
+    afterSign: path.resolve(__dirname, 'scripts/notarize.js'),
   },
   rebuildConfig: {},
   makers: [
