@@ -11,7 +11,7 @@ exports.default = async function notarizeApp(context) {
 
     return await notarize({
         appBundleId: 'tech.shik.updater.firmware',
-        appPath: `${appOutDir}/N32B Firmware updater.app`,
+        appPath: `${appOutDir}/n32b-firmware-updater.app`,
         appleId: process.env.APPLE_ID,
         appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD,
         teamId: process.env.APPLE_TEAM_ID,
