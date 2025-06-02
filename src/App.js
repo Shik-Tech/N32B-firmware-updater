@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { map, find, get } from 'lodash';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { find, get } from 'lodash';
 import { Alert, AppBar, Box, Button, CssBaseline, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Toolbar, Typography } from '@mui/material';
 import {
   UploadFileRounded as UploadFileRoundedIcon,
@@ -22,55 +22,28 @@ const RotatingIcon = styled(RotateRightIcon)({
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [alertIndex, setAlertIndex] = useState(0);
   const [resourcesPath, setResourcesPath] = useState('');
   const [midiInput, setMidiInput] = useState(null);
   const [midiOutput, setMidiOutput] = useState(null);
   const [deviceConnected, setDeviceConnected] = useState(false);
   const [firmwareVersion, setFirmwareVersion] = useState(null);
   const [deviceFirmwareOptions, setDeviceFirmwareOptions] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState('idle'); // 'idle' | 'uploading' | 'success' | 'error'
+  const uploadResponseHandler = useRef(null);
+  const [isPortReady, setIsPortReady] = useState(true);
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => {
     setOpenModal(false);
-    setIsUploading(false);
+    setUploadStatus('idle');
   };
 
   const handleFirmwareSelect = (event) => {
     setSelectedFile(event.target.value);
   }
 
-  useEffect(() => {
-    // Listen to the 'resources-path' event from the main process
-    window.api.receive('fromMain', (data) => {
-      if (data.type === 'resourcesPath') {
-        setResourcesPath(data.path);
-      }
-    });
-
-    // Request resources path from main process
-    window.api.send('toMain', { type: 'getResourcesPath' });
-  }, []);
-
-  useEffect(() => {
-    if (midiInput && midiOutput) {
-      midiInput.addListener('sysex', handleFirmwareSysEx);
-      midiOutput.sendSysex(32, [SEND_FIRMWARE_VERSION]);
-      const firmwareIndex = midiOutput.name === 'SHIK N32B' ? 0 : 1;
-      setDeviceFirmwareOptions(firmwares[firmwareIndex].firwmareOptions);
-      setSelectedFile(firmwares[firmwareIndex].firwmareOptions[0].value);
-    }
-    return () => {
-      if (midiInput) {
-        midiInput.removeListener('sysex', handleFirmwareSysEx);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [midiInput, midiOutput]);
-
-  function handleFirmwareSysEx(e) {
+  const handleFirmwareSysEx = useCallback((e) => {
     const {
       dataBytes,
       message: {
@@ -84,82 +57,137 @@ function App() {
         setFirmwareVersion(firmwareVersion);
       }
     }
-  }
+  }, []);
 
-  WebMidi.addListener("connected", (event) => {
-    const inputDevice = WebMidi.getInputByName("N32B");
-    const outputDevice = WebMidi.getOutputByName("N32B");
-    if (inputDevice && outputDevice && !midiInput && !midiOutput) {
+  const setupDevice = useCallback((inputDevice, outputDevice) => {
+    if (inputDevice && outputDevice) {
       setMidiInput(inputDevice);
       setMidiOutput(outputDevice);
       setDeviceConnected(true);
+      inputDevice.addListener('sysex', handleFirmwareSysEx);
+      outputDevice.sendSysex(32, [SEND_FIRMWARE_VERSION]);
+      const firmwareIndex = outputDevice.name === 'SHIK N32B' ? 0 : 1;
+      setDeviceFirmwareOptions(firmwares[firmwareIndex].firwmareOptions);
+      setSelectedFile(firmwares[firmwareIndex].firwmareOptions[0].value);
     }
-  });
+  }, [handleFirmwareSysEx]);
 
-  WebMidi.addListener("disconnected", (event) => {
-    const result = find(event.port, el => get(el, 'name') === 'SHIK N32B' | get(el, 'name') === 'SHIK N32B V3');
-    if (result) {
-      setDeviceConnected(false);
-      setFirmwareVersion(null);
-      setMidiInput(null);
-      setMidiOutput(null);
+  useEffect(() => {
+    // Listen to the 'resources-path' event from the main process
+    const handleResourcesPath = (data) => {
+      if (data.type === 'resourcesPath') {
+        setResourcesPath(data.path);
+      }
+    };
+
+    window.api.receive('fromMain', handleResourcesPath);
+    window.api.send('toMain', { type: 'getResourcesPath' });
+
+    // No cleanup needed for listeners handled by main process
+  }, []);
+
+  useEffect(() => {
+    if (midiInput) {
+      return () => {
+        midiInput.removeListener('sysex', handleFirmwareSysEx);
+      };
     }
-  });
+  }, [midiInput, handleFirmwareSysEx]);
 
-  WebMidi.enable({ sysex: true });
+  useEffect(() => {
+    const handleConnected = (event) => {
+      const inputDevice = WebMidi.getInputByName("N32B");
+      const outputDevice = WebMidi.getOutputByName("N32B");
+      if (inputDevice && outputDevice && !midiInput && !midiOutput) {
+        setupDevice(inputDevice, outputDevice);
+      }
+    };
+
+    const handleDisconnected = (event) => {
+      const result = find(event.port, el => get(el, 'name') === 'SHIK N32B' | get(el, 'name') === 'SHIK N32B V3');
+      if (result) {
+        setDeviceConnected(false);
+        setFirmwareVersion(null);
+        setMidiInput(null);
+        setMidiOutput(null);
+      }
+    };
+
+    WebMidi.addListener("connected", handleConnected);
+    WebMidi.addListener("disconnected", handleDisconnected);
+    WebMidi.enable({ sysex: true });
+
+    return () => {
+      WebMidi.removeListener("connected", handleConnected);
+      WebMidi.removeListener("disconnected", handleDisconnected);
+    };
+  }, [midiInput, midiOutput, setupDevice]);
 
   const handleUpload = async () => {
-    setIsUploading(true);
-    setAlertIndex(0);
+    if (!isPortReady) {
+      console.log('Port is not ready yet, please wait...');
+      return;
+    }
+
+    setUploadStatus('uploading');
+    setIsPortReady(false);
     handleOpenModal();
 
-    try {
-      // Request reset port from main process
-      window.api.send('toMain', { type: 'findResetPort' });
-      
-      // Listen for reset port response
-      window.api.receive('fromMain', async (data) => {
-        if (data.type === 'resetPort') {
-          const resetPort = data.data;
-          
-          // Request upload port
-          window.api.send('toMain', { type: 'findUploadPort' });
-          
-          // Listen for upload port response
-          window.api.receive('fromMain', async (data) => {
-            if (data.type === 'uploadPort') {
-              const uploadPort = data.data;
-              const rootFolder = midiOutput.name === 'SHIK N32B V3' ? 'v3' : 'v2';
-              const filePath = `${resourcesPath}/hexs/${rootFolder}/${selectedFile}`;
-              
-              // Request firmware upload
-              window.api.send('toMain', { 
-                type: 'uploadFirmware',
-                filePath,
-                uploadPort
-              });
-              
-              // Listen for upload completion
-              window.api.receive('fromMain', (data) => {
-                if (data.type === 'uploadComplete') {
-                  setIsUploading(false);
-                  setAlertIndex(1);
-                } else if (data.type === 'error') {
-                  setIsUploading(false);
-                  setAlertIndex(2);
-                  console.error(data.error);
-                }
-              });
-            }
-          });
+      try {
+        // Clean up any existing handler
+        if (uploadResponseHandler.current) {
+          window.api.receive('fromMain', uploadResponseHandler.current);
+          uploadResponseHandler.current = null;
         }
+
+        // Set up a single handler for all responses
+      const responseHandler = (data) => {
+          switch (data.type) {
+            case 'uploadComplete':
+              setUploadStatus('success');
+                  setIsPortReady(true);
+              break;
+
+            case 'error':
+              setUploadStatus('error');
+              setIsPortReady(true);
+              console.error(data.error);
+              break;
+
+            default:
+              break;
+          }
+        };
+
+        // Store the handler reference
+        uploadResponseHandler.current = responseHandler;
+        
+        // Set up the single handler
+        window.api.receive('fromMain', responseHandler);
+        
+      // Request firmware upload
+      const rootFolder = midiOutput.name === 'SHIK N32B V3' ? 'v3' : 'v2';
+      const filePath = `${resourcesPath}/hexs/${rootFolder}/${selectedFile}`;
+      window.api.send('toMain', { 
+        type: 'uploadFirmware',
+        filePath
       });
-    } catch (error) {
-      setIsUploading(false);
-      setAlertIndex(2);
-      console.error(error);
-    }
+      } catch (error) {
+        setUploadStatus('error');
+        setIsPortReady(true);
+        console.error(error);
+      }
   }
+
+  // Clean up upload handler when component unmounts
+  useEffect(() => {
+    return () => {
+      if (uploadResponseHandler.current) {
+        // The main process will handle cleanup of listeners
+        uploadResponseHandler.current = null;
+      }
+    };
+  }, []);
 
   return (
     <Box>
@@ -184,12 +212,14 @@ function App() {
 
       <Box component="main" sx={{ p: 3 }}>
         <Toolbar />
-        {(deviceConnected || isUploading) && firmwareVersion && deviceFirmwareOptions &&
+        {(deviceConnected || uploadStatus === 'uploading') && firmwareVersion && deviceFirmwareOptions &&
           <Stack
             direction="column"
             spacing={2}
           >
-            <Alert severity="success">Connected to {midiOutput.name}</Alert>
+            <Alert severity={uploadStatus === 'error' ? 'error' : 'success'}>
+              {uploadStatus === 'error' ? 'Error updating firmware' : `Connected to ${midiOutput.name}`}
+            </Alert>
 
             <Typography
               sx={{
@@ -214,9 +244,9 @@ function App() {
                   value={selectedFile}
                   label="Firmware"
                   onChange={handleFirmwareSelect}
-                  disabled={isUploading}
+                  disabled={uploadStatus === 'uploading'}
                 >
-                  {map(deviceFirmwareOptions, firmware => (
+                  {deviceFirmwareOptions.map(firmware => (
                     <MenuItem key={firmware.version} value={firmware.value}>{firmware.name} - v{firmware.version}</MenuItem>
                   ))}
                 </Select>
@@ -226,10 +256,10 @@ function App() {
                 onClick={handleUpload}
                 variant='contained'
                 startIcon={<UploadFileRoundedIcon />}
-                disabled={isUploading}
-                color='error'
+                disabled={uploadStatus === 'uploading' || !isPortReady}
+                color={uploadStatus === 'error' ? 'error' : 'primary'}
               >
-                Upload
+                {uploadStatus === 'uploading' ? 'Uploading...' : 'Upload'}
               </Button>
             </Stack>
           </Stack>
@@ -243,7 +273,7 @@ function App() {
           </Alert>
         }
 
-        {!deviceConnected && !isUploading &&
+        {!deviceConnected && uploadStatus === 'idle' &&
           <Alert severity="error">
             No device detected.
             <Typography>Please connect your N32B MIDI controller.</Typography>
@@ -253,8 +283,7 @@ function App() {
         <DialogBox
           openModal={openModal}
           handleCloseModal={handleCloseModal}
-          alertIndex={alertIndex}
-          isUploading={isUploading}
+          uploadStatus={uploadStatus}
         />
       </Box>
     </Box>
