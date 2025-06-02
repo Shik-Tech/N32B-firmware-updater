@@ -5,8 +5,7 @@ function DialogBox(props) {
     const {
         openModal,
         handleCloseModal,
-        alertIndex,
-        isUploading
+        uploadStatus
     } = props;
 
     const modalBoxStyle = {
@@ -21,20 +20,32 @@ function DialogBox(props) {
         p: 4,
     };
 
-    const alertsMessages = [
-        {
-            title: 'Updating firmware',
-            description: 'Please wait...'
-        },
-        {
-            title: 'Done!',
-            description: 'Enjoy your new firmware.'
-        },
-        {
-            title: 'Something went wrong!',
-            description: 'Please re-connect the device and try again. Contact our support if the issue continues.'
+    const getAlertMessage = () => {
+        switch (uploadStatus) {
+            case 'uploading':
+                return {
+                    title: 'Updating firmware',
+                    description: 'Please wait...'
+                };
+            case 'success':
+                return {
+                    title: 'Done!',
+                    description: 'Enjoy your new firmware.'
+                };
+            case 'error':
+                return {
+                    title: 'Something went wrong!',
+                    description: 'Please re-connect the device and try again. Contact our support if the issue continues.'
+                };
+            default:
+                return {
+                    title: '',
+                    description: ''
+                };
         }
-    ];
+    };
+
+    const alertMessage = getAlertMessage();
 
     return (
         <Modal
@@ -51,13 +62,13 @@ function DialogBox(props) {
                     spacing={2}
                 >
                     <Typography id="firmware-alerts" variant="h6" component="h2">
-                        {alertsMessages[alertIndex].title}
+                        {alertMessage.title}
                     </Typography>
                     <Typography id="firmware-alerts-description" sx={{ mt: 2 }}>
-                        {alertsMessages[alertIndex].description}
+                        {alertMessage.description}
                     </Typography>
 
-                    {!isUploading &&
+                    {uploadStatus !== 'uploading' &&
                         <Button
                             onClick={handleCloseModal}
                         >
