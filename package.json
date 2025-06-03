@@ -33,7 +33,7 @@
     "electron:dev": "cross-env APP_DEV=true concurrently \"BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:package": "react-scripts build && electron-forge package",
     "electron:make": "react-scripts build && electron-forge make",
-    "publish": "electron-forge publish"
+    "electron:publish": "electron-forge publish"
   },
   "eslintConfig": {
     "extends": "react-app"

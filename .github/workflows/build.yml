@@ -59,4 +59,4 @@ jobs:
       - name: Publish to GitHub Releases
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: yarn publish
+        run: yarn electron:publish
