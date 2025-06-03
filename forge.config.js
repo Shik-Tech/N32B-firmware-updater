@@ -37,6 +37,10 @@ module.exports = {
         license: 'MIT'
       },
     },
+    {
+      name: '@electron-forge/maker-dmg',
+      config: {}
+    },
   ],
   plugins: [
     {

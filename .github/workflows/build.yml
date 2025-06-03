@@ -56,6 +56,9 @@ jobs:
       - name: Build and Package Application
         run: yarn electron:make
 
+      - name: List build output
+        run: ls -lR out/make || echo "No build output"
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
