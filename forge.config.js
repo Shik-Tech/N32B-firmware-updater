@@ -59,4 +59,18 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: process.env.GITHUB_REPOSITORY_OWNER || 'Shik-Tech',
+          name: process.env.GITHUB_REPOSITORY_NAME || 'N32B-firmware-updater'
+        },
+        prerelease: false,
+        draft: true
+        // The token will be read from the GITHUB_TOKEN env variable
+      }
+    }
+  ],
 };
